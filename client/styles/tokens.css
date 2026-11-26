@@ -1,0 +1,340 @@
+/*
+ * Design tokens — untitled-office-game
+ *
+ * Source of truth: DESIGN.md §5 (colour), §6 (type), §7 (spacing/layout), §15 (motion).
+ * This file and art/palette/uog-master.gpl are the ONLY places raw colour values may appear.
+ * Components reference semantic tokens (--color-*), never palette tokens (--pal-*) directly,
+ * except in world/art code that genuinely needs a specific palette entry.
+ *
+ * Every length is expressed in logical pixels: calc(var(--px) * n).
+ * --px is overwritten at runtime with the current integer scale (ARCHITECTURE.md §4.7, §5.1).
+ */
+
+:root {
+  /* ------------------------------------------------------------------ */
+  /* Scale                                                               */
+  /* ------------------------------------------------------------------ */
+  --px: 1px; /* runtime: (scale in device px) / devicePixelRatio, in CSS px */
+  --logical-width: 480;
+  --logical-height: 270;
+
+  /* ------------------------------------------------------------------ */
+  /* Master palette — 64 colours, DESIGN.md §5.2. Index in brackets.     */
+  /* Ramps are ordered dark (0) → light.                                 */
+  /* ------------------------------------------------------------------ */
+
+  /* Ink — cool violet-greys: outlines, dark UI, shadows */
+  --pal-ink-0: #14121a; /* [00] */
+  --pal-ink-1: #221f2b; /* [01] */
+  --pal-ink-2: #35303f; /* [02] */
+  --pal-ink-3: #4a4456; /* [03] */
+  --pal-ink-4: #645d6e; /* [04] */
+  --pal-ink-5: #847d8c; /* [05] */
+  --pal-ink-6: #a8a2ab; /* [06] */
+  --pal-ink-7: #cdc8c8; /* [07] */
+
+  /* Putty — beige plastic, paper, light UI */
+  --pal-putty-0: #3a3029; /* [08] */
+  --pal-putty-1: #5e5143; /* [09] */
+  --pal-putty-2: #857561; /* [10] */
+  --pal-putty-3: #ad9d80; /* [11] */
+  --pal-putty-4: #cfc19f; /* [12] */
+  --pal-putty-5: #e6dcc0; /* [13] */
+  --pal-paper: #f6f0dd;   /* [14] */
+
+  /* Carpet — tired corporate blue-grey */
+  --pal-carpet-0: #1a222c; /* [15] */
+  --pal-carpet-1: #283646; /* [16] */
+  --pal-carpet-2: #3b4e62; /* [17] */
+  --pal-carpet-3: #55697f; /* [18] */
+
+  /* Wall — sickly green-grey: partitions, walls, LCD */
+  --pal-wall-0: #222820; /* [19] */
+  --pal-wall-1: #384232; /* [20] */
+  --pal-wall-2: #555f47; /* [21] */
+  --pal-wall-3: #7c8763; /* [22] */
+  --pal-wall-4: #a8af86; /* [23] */
+
+  /* Wood — laminate, coffee, cardboard, hair */
+  --pal-wood-0: #2a1b15; /* [24] */
+  --pal-wood-1: #4a2f22; /* [25] */
+  --pal-wood-2: #6f4930; /* [26] */
+  --pal-wood-3: #976a45; /* [27] */
+  --pal-wood-4: #bf9161; /* [28] */
+
+  /* Skin — shared edge + four ramps (0 = shadow, 2 = light) */
+  --pal-skin-edge: #2b1913; /* [29] */
+  --pal-skin-a0: #b47c5d;   /* [30] */
+  --pal-skin-a1: #dba886;   /* [31] */
+  --pal-skin-a2: #f3cfae;   /* [32] */
+  --pal-skin-b0: #8f5a3b;   /* [33] */
+  --pal-skin-b1: #b97d55;   /* [34] */
+  --pal-skin-b2: #dca47a;   /* [35] */
+  --pal-skin-c0: #613a24;   /* [36] */
+  --pal-skin-c1: #875234;   /* [37] */
+  --pal-skin-c2: #ad7149;   /* [38] */
+  --pal-skin-d0: #3d2318;   /* [39] */
+  --pal-skin-d1: #563321;   /* [40] */
+  --pal-skin-d2: #74482f;   /* [41] */
+
+  /* Accents — reserved for meaning (DESIGN.md §5.4) */
+  --pal-hi-0: #7d6420;     /* [42] highlighter */
+  --pal-hi-1: #e2bd3a;     /* [43] */
+  --pal-hi-2: #fbe98a;     /* [44] */
+  --pal-amber-0: #6e3516;  /* [45] */
+  --pal-amber-1: #d4732a;  /* [46] */
+  --pal-amber-2: #f2a65a;  /* [47] */
+  --pal-red-0: #571820;    /* [48] */
+  --pal-red-1: #b5333b;    /* [49] */
+  --pal-red-2: #e8685d;    /* [50] */
+  --pal-green-0: #1d4429;  /* [51] */
+  --pal-green-1: #2f7340;  /* [52] */
+  --pal-green-2: #7cc178;  /* [53] */
+  --pal-teal-0: #17403f;   /* [54] */
+  --pal-teal-1: #2d8580;   /* [55] */
+  --pal-teal-2: #6ccabd;   /* [56] */
+  --pal-violet-0: #2b2350; /* [57] */
+  --pal-violet-1: #5a4a9e; /* [58] */
+  --pal-violet-2: #9c8de0; /* [59] */
+  --pal-lime-1: #8fa830;   /* [60] */
+  --pal-lime-2: #c8de6a;   /* [61] */
+  --pal-rose-1: #b04a72;   /* [62] */
+  --pal-rose-2: #e48daa;   /* [63] */
+
+  /* ------------------------------------------------------------------ */
+  /* Semantic colour roles — DESIGN.md §5.3                              */
+  /* ------------------------------------------------------------------ */
+
+  /* Backgrounds */
+  --color-bg-app: var(--pal-ink-0);              /* letterbox, too-small screen */
+  --color-bg-surface: var(--pal-putty-5);        /* window/panel face (light) */
+  --color-bg-surface-raised: var(--pal-putty-4); /* secondary buttons, toolbars */
+  --color-bg-surface-sunken: var(--pal-paper);   /* inputs, lists, tables, paper */
+  --color-bg-dark: var(--pal-ink-1);             /* HUD, tooltips, toasts, dark panels */
+  --color-bg-dark-raised: var(--pal-ink-2);
+  --color-bg-well: var(--pal-ink-0);             /* meter wells, LED housings */
+  --color-bg-overlay: var(--pal-ink-0);          /* dithered 50% modal backdrop */
+  --color-bg-zebra: var(--pal-putty-5);          /* alternate table row on paper */
+
+  /* Lines and bevels */
+  --color-line: var(--pal-ink-0);                /* 1px outline of every UI element */
+  --color-line-soft: var(--pal-putty-3);         /* dividers on light surfaces */
+  --color-line-soft-inverse: var(--pal-ink-3);   /* dividers on dark surfaces */
+  --color-bevel-light: var(--pal-paper);         /* top/left inner edge on putty faces */
+  --color-bevel-dark: var(--pal-putty-3);        /* bottom/right inner edge on putty faces */
+  --color-bevel-light-dark: var(--pal-ink-3);    /* top/left inner edge on ink faces */
+  --color-bevel-dark-dark: var(--pal-ink-0);     /* bottom/right inner edge on ink faces */
+  --color-shadow: var(--pal-ink-0);              /* hard dithered drop shadow */
+  --color-index-rule: var(--pal-red-1);          /* red rule on index cards */
+
+  /* Text */
+  --color-text: var(--pal-ink-1);                /* 11.8:1 on putty-5 */
+  --color-text-muted: var(--pal-ink-4);          /* 4.6:1 on putty-5 */
+  --color-text-disabled: var(--pal-ink-5);       /* disabled only */
+  --color-text-inverse: var(--pal-paper);        /* 14.2:1 on ink-1 */
+  --color-text-inverse-muted: var(--pal-ink-6);  /* 6.5:1 on ink-1 */
+  --color-text-inverse-disabled: var(--pal-ink-4);
+  --color-text-link: var(--pal-carpet-2);        /* in-world references, always underlined */
+
+  /* Interaction */
+  --color-interact: var(--pal-hi-1);             /* hover outline, world hotspot outline */
+  --color-interact-light: var(--pal-hi-2);       /* selection fill, text highlight */
+  --color-interact-dark: var(--pal-hi-0);        /* selected text on paper */
+  --color-focus: var(--pal-hi-1);                /* focus ring inner */
+  --color-focus-outer: var(--pal-ink-0);         /* focus ring outer */
+
+  /* Buttons */
+  --color-primary: var(--pal-carpet-2);
+  --color-primary-hover: var(--pal-carpet-3);
+  --color-primary-pressed: var(--pal-carpet-1);
+  --color-primary-bevel-light: var(--pal-carpet-3);
+  --color-primary-bevel-dark: var(--pal-carpet-0);
+  --color-on-primary: var(--pal-paper);          /* 7.5:1 */
+  --color-secondary: var(--pal-putty-4);
+  --color-secondary-hover: var(--pal-putty-5);
+  --color-secondary-pressed: var(--pal-putty-3);
+  --color-secondary-bevel-light: var(--pal-paper);
+  --color-secondary-bevel-dark: var(--pal-putty-2);
+  --color-on-secondary: var(--pal-ink-1);        /* 9.1:1 */
+  --color-danger: var(--pal-red-1);
+  --color-danger-pressed: var(--pal-red-0);
+  --color-danger-bevel-light: var(--pal-red-2);
+  --color-danger-bevel-dark: var(--pal-red-0);
+  --color-on-danger: var(--pal-paper);           /* 5.3:1 */
+  --color-go: var(--pal-green-1);                /* phone Answer only */
+  --color-go-pressed: var(--pal-green-0);
+  --color-go-bevel-light: var(--pal-green-2);
+  --color-go-bevel-dark: var(--pal-green-0);
+  --color-on-go: var(--pal-paper);               /* 5.1:1 */
+  --color-disabled-face: var(--pal-putty-3);
+  --color-on-disabled: var(--pal-ink-4);
+
+  /* Status (always paired with an icon or label) */
+  --color-status-success: var(--pal-green-2);    /* on dark */
+  --color-status-success-on-light: var(--pal-green-1);
+  --color-status-warning: var(--pal-amber-2);
+  --color-status-warning-on-light: var(--pal-amber-0);
+  --color-status-danger: var(--pal-red-2);
+  --color-status-danger-on-light: var(--pal-red-1);
+  --color-status-info: var(--pal-ink-6);
+  --color-status-info-on-light: var(--pal-ink-3);
+
+  /* Money */
+  --color-money: var(--pal-green-2);             /* on dark */
+  --color-money-on-light: var(--pal-green-1);
+  --color-money-negative: var(--pal-red-2);
+  --color-money-negative-on-light: var(--pal-red-1);
+
+  /* Meters — fill (light step) + shade row (base step). Empty segments use --color-meter-empty. */
+  --color-meter-empty: var(--pal-ink-2);
+  --color-meter-energy: var(--pal-lime-2);
+  --color-meter-energy-shade: var(--pal-lime-1);
+  --color-meter-energy-low: var(--pal-amber-2);
+  --color-meter-energy-low-shade: var(--pal-amber-1);
+  --color-meter-energy-critical: var(--pal-red-2);
+  --color-meter-energy-critical-shade: var(--pal-red-1);
+  --color-meter-sleepiness: var(--pal-violet-2);
+  --color-meter-sleepiness-shade: var(--pal-violet-1);
+  --color-meter-caffeine: var(--pal-wood-4);
+  --color-meter-caffeine-shade: var(--pal-wood-3);
+  --color-meter-trust: var(--pal-teal-2);
+  --color-meter-trust-shade: var(--pal-teal-1);
+  --color-meter-suspicion: var(--pal-amber-2);
+  --color-meter-suspicion-shade: var(--pal-amber-1);
+  --color-meter-patience: var(--pal-rose-2);
+  --color-meter-patience-shade: var(--pal-rose-1);
+  --color-meter-progress: var(--pal-paper);      /* quota, research, generic progress */
+  --color-meter-progress-shade: var(--pal-ink-6);
+  --color-meter-threshold: var(--pal-hi-1);      /* threshold tick */
+
+  /* Computer OS */
+  --color-os-bezel: var(--pal-putty-3);
+  --color-os-bezel-dark: var(--pal-putty-1);
+  --color-os-desktop: var(--pal-carpet-1);
+  --color-os-desktop-pattern: var(--pal-carpet-0);
+  --color-os-titlebar: var(--pal-carpet-2);
+  --color-os-titlebar-hatch: var(--pal-carpet-1);
+  --color-os-titlebar-text: var(--pal-paper);
+  --color-os-titlebar-inactive: var(--pal-putty-3);
+  --color-os-titlebar-inactive-hatch: var(--pal-putty-2);
+  --color-os-titlebar-inactive-text: var(--pal-ink-2);
+  --color-os-tab: var(--pal-putty-4);            /* folder tabs (launcher) */
+  --color-os-tab-active: var(--pal-putty-5);
+
+  /* Phone (desk phone body + LCD) */
+  --color-phone-body: var(--pal-putty-4);
+  --color-phone-body-shade: var(--pal-putty-2);
+  --color-lcd-bg: var(--pal-wall-4);
+  --color-lcd-text: var(--pal-wall-0);           /* 6.6:1 */
+  --color-lcd-ghost: var(--pal-wall-3);          /* unlit segments */
+  --color-led-ring: var(--pal-red-2);
+  --color-led-off: var(--pal-ink-3);
+  --color-tape: var(--pal-paper);                /* teleprinter transcript */
+  --color-tape-margin: var(--pal-putty-5);
+  --color-tape-hole: var(--pal-putty-3);
+  --color-badge: var(--pal-red-1);
+  --color-on-badge: var(--pal-paper);
+
+  /* Portrait backgrounds by role (DESIGN.md §11.6) */
+  --color-portrait-contact: var(--pal-carpet-1);
+  --color-portrait-coworker: var(--pal-wall-1);
+  --color-portrait-boss: var(--pal-red-0);
+  --color-portrait-candidate: var(--pal-wood-1);
+  --color-portrait-unknown: var(--pal-ink-2);
+
+  /* Documents */
+  --color-doc-pink-slip: var(--pal-rose-2);      /* termination notice */
+  --color-doc-letterhead-boss: var(--pal-red-1);
+  --color-stamp-good: var(--pal-green-1);
+  --color-stamp-bad: var(--pal-red-1);
+  --color-stamp-neutral: var(--pal-carpet-2);
+
+  /* ------------------------------------------------------------------ */
+  /* Dither patterns (hard-stop, 1 logical px cells — not visual gradients) */
+  /* ------------------------------------------------------------------ */
+  --dither-50: repeating-conic-gradient(var(--color-bg-overlay) 0 25%, transparent 0 50%) 0 0 / calc(var(--px) * 2) calc(var(--px) * 2);
+  --dither-50-shadow: repeating-conic-gradient(var(--color-shadow) 0 25%, transparent 0 50%) 0 0 / calc(var(--px) * 2) calc(var(--px) * 2);
+
+  /* ------------------------------------------------------------------ */
+  /* Typography — DESIGN.md §6                                           */
+  /* ------------------------------------------------------------------ */
+  --font-ui: 'Departure Mono', ui-monospace, monospace;
+  --font-title: 'Jersey 15', 'Departure Mono', monospace;   /* pixel-exact ONLY at 27 lpx (15 lpx caps) */
+  --font-readable: 'Atkinson Hyperlegible Next', sans-serif; /* accessibility option only */
+
+  --font-size-ui: calc(var(--px) * 11);        /* Departure Mono native; 7 lpx advance */
+  --font-size-title: calc(var(--px) * 27);     /* Jersey 15 native */
+  --font-size-readable: calc(var(--px) * 11);
+
+  --line-height-tight: calc(var(--px) * 12);   /* single-line controls, labels */
+  --line-height-body: calc(var(--px) * 14);    /* paragraphs, transcript, lists */
+  --line-height-title: calc(var(--px) * 28);
+  --line-height-readable: calc(var(--px) * 16);
+
+  /* ------------------------------------------------------------------ */
+  /* Spacing — DESIGN.md §7.1 (named by logical px value)                */
+  /* ------------------------------------------------------------------ */
+  --sp-1: calc(var(--px) * 1);
+  --sp-2: calc(var(--px) * 2);
+  --sp-4: calc(var(--px) * 4);
+  --sp-6: calc(var(--px) * 6);
+  --sp-8: calc(var(--px) * 8);
+  --sp-12: calc(var(--px) * 12);
+  --sp-16: calc(var(--px) * 16);
+  --sp-24: calc(var(--px) * 24);
+  --sp-32: calc(var(--px) * 32);
+
+  /* ------------------------------------------------------------------ */
+  /* Component sizes — DESIGN.md §14                                     */
+  /* ------------------------------------------------------------------ */
+  --size-hud-height: calc(var(--px) * 20);
+  --size-button-height: calc(var(--px) * 16);
+  --size-button-height-large: calc(var(--px) * 20);
+  --size-button-min-width: calc(var(--px) * 40);
+  --size-input-height: calc(var(--px) * 16);
+  --size-row: calc(var(--px) * 14);
+  --size-row-double: calc(var(--px) * 28);
+  --size-titlebar: calc(var(--px) * 14);
+  --size-statusbar: calc(var(--px) * 12);
+  --size-folder-tab: calc(var(--px) * 18);
+  --size-scrollbar: calc(var(--px) * 7);
+  --size-icon-sm: calc(var(--px) * 9);
+  --size-icon-md: calc(var(--px) * 16);
+  --size-icon-lg: calc(var(--px) * 32);
+  --size-portrait: calc(var(--px) * 64);
+  --size-portrait-thumb: calc(var(--px) * 32);
+  --size-toast-width: calc(var(--px) * 160);
+  --size-tooltip-max-width: calc(var(--px) * 160);
+  --size-modal-small: calc(var(--px) * 240);
+  --size-modal-medium: calc(var(--px) * 320);
+  --size-modal-large: calc(var(--px) * 400);
+  --border-1: calc(var(--px) * 1);
+  --shadow-offset: calc(var(--px) * 2);
+
+  /* ------------------------------------------------------------------ */
+  /* Motion — DESIGN.md §15 (all motion is stepped)                      */
+  /* ------------------------------------------------------------------ */
+  --frame: 50ms;                 /* base animation tick */
+  --dur-hover: 0ms;              /* hover is instant */
+  --dur-press: 50ms;
+  --dur-fast: 100ms;             /* close, dismiss */
+  --dur-base: 150ms;             /* open, slide-in */
+  --dur-slow: 300ms;             /* scene transition (150 out + 150 in) */
+  --dur-tooltip-delay: 400ms;
+  --steps-2: steps(2, end);
+  --steps-3: steps(3, end);
+  --steps-4: steps(4, end);
+
+  /* ------------------------------------------------------------------ */
+  /* Layers — ARCHITECTURE.md §4.1                                       */
+  /* ------------------------------------------------------------------ */
+  --z-world: 0;
+  --z-hotspots: 10;
+  --z-hud: 20;
+  --z-screen: 30;
+  --z-effects: 35;               /* sleepiness vignette/eyelids: above screens, below modals */
+  --z-modal: 40;
+  --z-toast: 50;
+  --z-tooltip: 60;
+  --z-system: 70;
+}

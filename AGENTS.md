@@ -25,7 +25,7 @@ Current phase and what exists: see the **Implementation status** table at the en
 2. **Inspect existing code before editing.** Search the repository (by name, by type, by command/event name) for the feature, helper, component or constant you are about to write. Never assume a feature does not exist.
 3. **Map dependencies.** Identify which layers your change touches (see ARCHITECTURE.md §3.3 import rules): `shared/`, `client/engine`, `client/game`, `client/world`, `client/ui`, `client/controllers|services|voice`, `server/`. Check what imports the code you change.
 4. **Know the phase.** Work belongs to the phase in ARCHITECTURE.md §20. Do not pull later-phase systems forward "while you're there" unless the task asks for it.
-5. **Ask when the documents do not answer it.** If a decision is listed as unresolved (ARCHITECTURE.md §21, DESIGN.md §13), do not decide it implicitly in code. Raise it, or implement it behind a clearly named constant and flag it.
+5. **Ask when the documents do not answer it.** If a decision is listed as unresolved (ARCHITECTURE.md §21, DESIGN.md §24), do not decide it implicitly in code. Raise it, or implement it behind a clearly named constant and flag it.
 
 ---
 
@@ -98,11 +98,16 @@ Current phase and what exists: see the **Implementation status** table at the en
 
 ## 5. Visual consistency
 
-* **DESIGN.md is the visual source of truth.** Do not invent new colours, fonts, sizes, spacing, shadows, radii, transitions or icon styles. Use tokens (`client/styles/tokens.css`) and components (`client/ui/components/`).
-* Raw colour values and font declarations appear **only** in token files. Raw pixel values in CSS must be multiples of the logical pixel (`calc(var(--px) * n)`).
-* New screens are assembled from existing components. If a new component is needed, specify it in DESIGN.md §6 first (same change is fine), then build it in `ui/components/` and add it to the component gallery.
-* Pixel art follows DESIGN.md §3–4 and §9: one scale, master palette only, one outline and lighting convention, kebab-case asset names, original work only.
-* **Never** introduce generic AI-generated SaaS/dashboard styling (DESIGN.md §11): rounded cards, soft shadows, gradients, blur, stock icon sets, emoji icons, system fonts, spinners.
+* **Read DESIGN.md before implementing anything visual or audible**: at least the sections you touch plus §4 (pixel-art specifications), §5 (palette), §14 (components) and §23 (anti-patterns). Use `design/reference/index.html` to see how components and screens should look.
+* **DESIGN.md is the visual source of truth.** Do not invent new colours, fonts, sizes, spacing, shadows, radii, transitions or icon styles. Never introduce an arbitrary visual style "just for this screen". Use tokens (`client/styles/tokens.css`) and components (`client/ui/components/`).
+* **Palette:** every colour comes from the 64-colour master palette (DESIGN.md §5), used through semantic `--color-*` tokens. Saturated accents keep their reserved meanings (§5.4). Raw colour values and font declarations appear **only** in token files (`tokens.css`, `art/palette/*`).
+* **Pixel-art specifications:** 480×270 logical grid, integer scaling only, one pixel size (no mixels), fixed sprite and portrait sizes, one outline/lighting/shading convention, 50 ms animation tick (DESIGN.md §3–4, §11, §20–21). Raw pixel values in CSS must be multiples of the logical pixel (`calc(var(--px) * n)` or a `--sp-*`/`--size-*` token).
+* **Spacing and typography:** only the `--sp-*` spacing scale and the five text styles (DESIGN.md §6–7). Fonts only at their native sizes: Departure Mono 11, Jersey 15 at 27. Never bold, never other sizes.
+* **Reuse established components.** New screens are assembled from existing components on one of the four materials (DESIGN.md §2.2). If a new component is needed, specify it in DESIGN.md §14 first (same change is fine), then build it in `ui/components/`, add it to the component gallery and the reference sheet. Do not create a visually different version of an existing component.
+* **Consistent treatment across applications:** every computer app uses the shared window chrome, one of the three app templates and the shared loading/empty/error/locked states (DESIGN.md §9). Apps never restyle chrome.
+* Pixel art follows DESIGN.md §3–4 and §20–21: one scale, master palette only, one outline and lighting convention, kebab-case asset names, original work only.
+* **Never** introduce generic AI-generated SaaS/dashboard styling (DESIGN.md §23): rounded cards, soft shadows, gradients, blur, stock icon sets, emoji icons, system fonts, spinners.
+* **Intentional design-system changes update DESIGN.md**, `tokens.css` and the reference sheet in the same change, with a DESIGN.md §25 change-log entry. Code must never silently diverge from DESIGN.md.
 * Before finishing visual work, compare it side by side with an existing screen at the same scale. If it does not look like the same game, it is not done.
 
 ---
@@ -126,7 +131,7 @@ Current phase and what exists: see the **Implementation status** table at the en
   * new/changed env var → `.env.example` + ARCHITECTURE.md §13 + README if it affects setup;
   * new runtime dependency or architectural choice → ARCHITECTURE.md §22 decision log;
   * phase progress → Implementation status table in ARCHITECTURE.md and the status section in README;
-  * new component/visual rule → DESIGN.md.
+  * new component/visual rule → DESIGN.md (+ `tokens.css`, `design/reference/index.html`, change log §25).
 * Documentation must describe reality. Never claim a feature, script or command exists before it does; label targets as "planned"/"target".
 * Keep docs consistent with each other; if you find a contradiction, fix it or report it.
 
@@ -180,10 +185,10 @@ Current phase and what exists: see the **Implementation status** table at the en
 | Task | Where | Also update |
 |---|---|---|
 | New game mechanic | `client/game/systems/<name>-system.ts` + rules constants + commands/events | Tests, ARCHITECTURE.md §9–10 if shapes change, save migration if saved |
-| New computer app | `client/ui/computer/apps/<app-id>/` + manifest in `registry.ts` | DESIGN.md if new component needed |
-| New character | `shared/content/characters/<id>.ts` + portrait (all emotions) + voice profile | Content validation must pass |
+| New computer app | `client/ui/computer/apps/<app-id>/` + manifest in `registry.ts` | DESIGN.md §9.6 entry (purpose, layout, states); §14 if a new component is needed |
+| New character | `shared/content/characters/<id>.ts` + portrait from the kit (DESIGN.md §11: 18 frames) + voice profile | Content validation must pass; DESIGN.md §11.8 checklist |
 | New upgrade/research/event | `shared/content/...` using modifiers | Content validation; never special-case in systems |
 | New API route | `server/routes/` + schema in `shared/schemas/api/` + client call in `client/services/` | Integration test, ARCHITECTURE.md §6.2 |
 | New AI/voice provider | `server/ai/<name>-llm.ts` or `server/voice/<name>-tts.ts` + factory branch | `.env.example`, ARCHITECTURE.md §7/§8/§13/§22 |
 | New env var | `server/config.ts` schema | `.env.example`, ARCHITECTURE.md §13, README |
-| New visual component | DESIGN.md §6 spec → `client/ui/components/` → gallery | — |
+| New visual component | DESIGN.md §14 spec → `client/ui/components/` → gallery | `design/reference/index.html` |

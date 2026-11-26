@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 
-> **Status:** Phase 1 (Foundation) — this is the technical source of truth. Nothing described here is implemented yet unless the [Implementation status](#implementation-status) table says so.
+> **Status:** Phase 2 (Design) complete — this is the technical source of truth. Nothing described here is implemented yet unless the [Implementation status](#implementation-status) table says so.
 >
 > **Working identifier:** `untitled-office-game` (temporary; not a name, see [§1.4](#14-naming)).
 >
@@ -242,7 +242,7 @@ Created incrementally from Phase 3. Directories that do not exist yet are create
 │   ├── controllers/          # async orchestration (call, dialogue, voice, autosave)
 │   ├── services/             # API clients, SaveStorage, capability detection
 │   ├── voice/                # mic capture, WAV encoding, playback, browser TTS fallback
-│   ├── styles/               # tokens.css (Phase 2), base.css
+│   ├── styles/               # tokens.css (exists since Phase 2), base.css
 │   └── public/assets/        # exported sprites, fonts, audio (runtime assets)
 ├── server/
 │   ├── index.ts              # Node entry: serve static + API
@@ -257,6 +257,9 @@ Created incrementally from Phase 3. Directories that do not exist yet are create
 │   ├── content/              # characters, voices, scenarios, upgrades, research, events
 │   └── constants.ts
 ├── art/                      # source art (.aseprite etc.), not shipped
+│   └── palette/              # uog-master.gpl / .hex — the 64-colour master palette (Phase 2)
+├── design/
+│   └── reference/            # index.html: rendered visual reference for DESIGN.md (not shipped)
 ├── tests/
 │   └── e2e/                  # Playwright specs
 └── scripts/                  # dev utilities (asset export, AI eval)
@@ -286,6 +289,8 @@ The screen is composed of stacked layers inside a single game root element sized
 ┌──────────────────────────────────────────────┐  z
 │ Overlay layer (DOM): modals, toasts, tooltips │  4
 ├──────────────────────────────────────────────┤
+│ Effects layer (DOM): sleepiness, dozing       │  3.5
+├──────────────────────────────────────────────┤
 │ Screen layer (DOM): computer, phone, dialogue │  3
 ├──────────────────────────────────────────────┤
 │ HUD layer (DOM): clock, meters, quota         │  2
@@ -296,9 +301,10 @@ The screen is composed of stacked layers inside a single game root element sized
 └──────────────────────────────────────────────┘
 ```
 
-* **World layer** — one `<canvas>` drawing the current location: background, props, characters, ambient animation, and full-screen effects such as sleepiness vignette.
+* **World layer** — one `<canvas>` drawing the current location: background, props, characters, ambient animation, hotspot highlights and world-only effects (evening lighting overlay).
+* **Effects layer** — a DOM overlay for player-state effects that must also cover the computer and phone screens (sleepiness vignette, blinking eyelids, dozing). It never covers the HUD rows. Spec: DESIGN.md §15.7.
 * **Hotspot layer** — for every interactive object in the current scene, an absolutely-positioned, transparent `<button>` with an accessible name. This gives keyboard navigation, screen-reader names and Playwright-clickable targets for free, while the visual highlight is drawn on the canvas. Pointer hit-testing therefore uses the DOM, not custom canvas maths. Pixel-precise shapes are handled by a per-hotspot rectangle list (plus optional alpha-mask check for irregular sprites).
-* **HUD, screen and overlay layers** — Preact components styled exclusively with design tokens from [DESIGN.md](DESIGN.md).
+* **HUD, screen and overlay layers** — Preact components styled exclusively with design tokens from [DESIGN.md](DESIGN.md). z-index values are tokens (`--z-*` in `client/styles/tokens.css`).
 
 ### 4.2 Bootstrap sequence
 
@@ -326,7 +332,7 @@ The office is a small **location graph** (e.g. `desk`, `office-floor`, `break-ro
 * exits to other locations,
 * ambient animations and audio loop.
 
-Moving is a command (`goToLocation`). The world plays a short transition (fade or wipe per DESIGN.md). Walking animation, if added, is cosmetic and never blocks the command.
+Moving is a command (`goToLocation`). The world plays a short transition (the 300 ms dither "blink", DESIGN.md §15.4). Walking animation, if added, is cosmetic and never blocks the command.
 
 The desk location has a **computer** hotspot that opens the computer screen and a **phone** that opens the phone screen. Computer-focused play happens almost entirely in the screen layer.
 
@@ -339,7 +345,7 @@ The in-game computer is an OS shell (`client/ui/computer/`) that hosts independe
 export interface ComputerAppManifest {
   id: AppId;                                // stable kebab-case, e.g. "contacts"
   title: string;                            // in-world app name (Phase 2 copy)
-  icon: SpriteRef;                          // 16×16 and 32×32 icons per DESIGN.md
+  icon: SpriteRef;                          // 9×9, 16×16 and 32×32 icons per DESIGN.md §14.20
   order: number;                            // desktop / launcher order
   load: () => Promise<{ default: ComponentType<AppProps> }>; // lazy import → code split
   isAvailable: (s: GameState) => boolean;   // unlocked by progression?
@@ -354,17 +360,17 @@ Rules:
 * Every app handles loading, empty and error states using the shared components.
 * Every app is registered in one registry file (`client/ui/computer/apps/registry.ts`). Unavailable apps render as locked, never as fake working UIs.
 
-Planned apps (final names and visuals decided in Phase 2):
+Planned apps (in-world titles, layouts and states: DESIGN.md §9.6):
 
 | App id | Purpose | Phase |
 |---|---|---|
-| `dashboard` | Today's quota, objectives, boss messages, day summary | 4 |
-| `contacts` | Character directory: known profile info, relationship meters, call history, "call" action | 4 (shell) / 5 (data) |
-| `mail` | In-world messages from boss, coworkers, events | 4 |
-| `finances` | Balance, daily ledger, expenses, payroll | 8 |
-| `research` | Research projects that unlock modifiers | 8 |
-| `shop` | Equipment and office upgrades | 8 |
-| `staff` | Hire, manage and fire employees | 8 |
+| `dashboard` ("Today") | Today's quota, objectives, boss messages, day summary | 4 |
+| `contacts` ("Card File") | Character directory: known profile info, relationship meters, call history, "call" action | 4 (shell) / 5 (data) |
+| `mail` ("Memos") | In-world messages from boss, coworkers, events | 4 |
+| `finances` ("Ledger") | Balance, daily ledger, expenses, payroll | 8 |
+| `research` ("Initiatives") | Research projects that unlock modifiers | 8 |
+| `shop` ("Procurement") | Equipment and office upgrades | 8 |
+| `staff` ("Personnel") | Hire, manage and fire employees | 8 |
 
 ### 4.6 Controllers (async orchestration)
 
@@ -389,11 +395,12 @@ Controllers in `client/controllers/` bridge the synchronous simulation and async
 
 ### 5.1 Logical resolution and scaling
 
-* The game renders at a fixed **logical resolution**. Recommended: **640×360** (16:9), because it scales by whole numbers to 1280×720 (×2), 1920×1080 (×3), 2560×1440 (×4) and 3840×2160 (×6). The final value is confirmed in Phase 2 ([DESIGN.md §3](DESIGN.md)); the engine treats it as the constants `LOGICAL_WIDTH` / `LOGICAL_HEIGHT` in `shared/constants.ts`.
+* The game renders at a fixed **logical resolution of 480×270** (16:9; decided in Phase 2, [DESIGN.md §4.1](DESIGN.md#41-logical-resolution-and-scale)). It scales by whole numbers to 960×540 (×2), 1440×810 (×3), 1920×1080 (×4) and 2880×1620 (×6). 640×360 was the Phase 1 recommendation, but in a windowed browser it only reaches ×1 on 1366×768 laptops and ×2 on 1080p monitors. 480×270 reaches ×2–×6 on every common setup. The engine treats it as the constants `LOGICAL_WIDTH` / `LOGICAL_HEIGHT` in `shared/constants.ts`.
 * **Integer scaling only.** Scale = the largest integer such that `LOGICAL × scale ≤ available device pixels`. The remainder is letterboxed with the background colour token. Fractional scaling is never used for the game root.
 * Canvas backing store = `LOGICAL × scale` device pixels; CSS size divides by `devicePixelRatio` so one logical pixel maps to exactly `scale` device pixels. `imageSmoothingEnabled = false`; CSS `image-rendering: pixelated`.
 * All world positions are **integers in logical pixels** at draw time (sub-pixel movement is accumulated in floats but rounded when drawing) — no shimmering.
 * Players can lower the scale in settings (e.g. to fit a small window) but never to a fraction.
+* Minimum supported size: scale ≥ 2 device px per logical px **and** ≥ 1.5 CSS px per logical px. Below that the game pauses and shows a too-small notice with a "Play anyway" option (DESIGN.md §17.3).
 
 ### 5.2 Renderer interface
 
@@ -418,7 +425,7 @@ A scene is drawn as ordered layers: `background → props (sorted by y) → char
 
 ### 5.4 Assets
 
-* **Sprite sheets** exported from source art in `art/` (Aseprite recommended) as PNG + JSON frame data into `client/public/assets/sprites/`. Naming per [DESIGN.md §9](DESIGN.md).
+* **Sprite sheets** exported from source art in `art/` (Aseprite recommended) as PNG + JSON frame data into `client/public/assets/<category>/` (`bg`, `prop`, `char`, `portrait`, `icon`, `cursor`, `stamp`, `fx`). Naming and export rules: [DESIGN.md §20–21](DESIGN.md#20-asset-naming-conventions).
 * **Asset manifest** per scene lists the sprites, fonts and sounds it needs. The `AssetLoader` preloads a scene's manifest before the transition completes and caches decoded `ImageBitmap`s.
 * **Fonts** for DOM UI are self-hosted (no third-party font CDNs) with OFL or similarly permissive licences recorded in `client/public/assets/fonts/LICENSES.md`.
 * **Animation** is frame-based: each animation is a list of frame indices and per-frame durations (ms). An `Animator` advances by real elapsed time; animations never depend on frame rate.
@@ -602,7 +609,7 @@ DialogueTurnResponse = {
 }
 ```
 
-The `Emotion` enum is shared with DESIGN.md's portrait expression set; adding an emotion requires new portrait frames for every character.
+The `Emotion` enum is shared with DESIGN.md's portrait expression set (§11.7). Adding an emotion means drawing it for every face base of the portrait kit and re-exporting every character's portrait sheet (DESIGN.md §11.5).
 
 ### 7.6 Response validation pipeline
 
@@ -1262,8 +1269,9 @@ Each phase's acceptance criteria ([§20](#20-development-roadmap)) are verified 
 | `npm run lint` / `npm run format` | ESLint / Prettier |
 | `npm run typecheck` | `tsc --noEmit` for all projects |
 | `npm run ai:eval` | Opt-in live model evaluation (Phase 5) |
+| `npm run check:palette` | Fails if any exported PNG uses an off-palette colour or partial alpha (DESIGN.md §21.2; from the first art commit) |
 
-CI (GitHub Actions) on every push/PR: `typecheck`, `lint`, `test`, `build`, and from Phase 3 `test:e2e`.
+CI (GitHub Actions) on every push/PR: `typecheck`, `lint`, `test`, `build`, from Phase 3 `test:e2e`, and `check:palette` once art exists.
 
 ---
 
@@ -1327,7 +1335,7 @@ Set `DAILY_AI_REQUEST_BUDGET`, OpenRouter key credit limits, and conservative ra
 
 Each phase ends with: all acceptance criteria met, tests green, docs updated, and the [Implementation status](#implementation-status) table updated. A phase may be split into smaller increments; it may not skip criteria.
 
-### Phase 1 — Foundation *(this phase)*
+### Phase 1 — Foundation *(complete)*
 
 **Deliverables:** ARCHITECTURE.md, AGENTS.md, DESIGN.md (principles), README.md, LICENSE (MIT), `.gitignore`, `.env.example`, `.editorconfig`, CLAUDE.md pointer.
 **Acceptance criteria:**
@@ -1335,14 +1343,14 @@ Each phase ends with: all acceptance criteria met, tests green, docs updated, an
 - [x] Stack decisions are justified; unresolved decisions are listed (§21).
 - [x] No gameplay code, no dependencies installed, no generated assets.
 
-### Phase 2 — Design (`/design`)
+### Phase 2 — Design *(complete)*
 
 **Deliverables:** expanded DESIGN.md with final logical resolution, palette (hex values), typography (licensed fonts), design tokens, component specifications with all states, layouts for key screens (office view + HUD, computer desktop + app template, phone incoming/in-call/summary, dialogue, briefing, review, evening/management, title, settings, game over), asset specification list (sizes, frame counts, naming), sound direction, and reference mockups. Token source files (`client/styles/tokens.css`) may be created.
 **Acceptance criteria:**
-- [ ] Every component in DESIGN.md §6 has a specification covering states and spacing.
-- [ ] Every key screen listed above has a layout at the logical resolution.
-- [ ] Palette, fonts and pixel scale are final; font licences recorded.
-- [ ] A Phase 3 developer can build the UI without inventing any visual decisions.
+- [x] Every component in DESIGN.md §14 has a specification covering states and spacing.
+- [x] Every key screen listed above has a layout at the logical resolution (DESIGN.md §8–13; greybox mock-ups in `design/reference/index.html`).
+- [x] Palette, fonts and pixel scale are final; font licences recorded (DESIGN.md §6.1). Firefox/WebKit font rendering check carried to Phase 3 (DESIGN.md §24 D12).
+- [x] A Phase 3 developer can build the UI without inventing any visual decisions. Open items are listed in DESIGN.md §24.
 
 ### Phase 3 — First playable build
 
@@ -1413,10 +1421,10 @@ Each phase ends with: all acceptance criteria met, tests green, docs updated, an
 | # | Decision | Owner / phase | Current recommendation |
 |---|---|---|---|
 | U1 | Game name and branding | Project owner, before Phase 9 | Keep `untitled-office-game` until decided. |
-| U2 | Final logical resolution | Phase 2 | 640×360 (§5.1). |
-| U3 | Palette, fonts, outline/lighting conventions | Phase 2 | Process in DESIGN.md. |
+| U2 | Final logical resolution | **Resolved (Phase 2)** | 480×270 (§5.1, decision log). |
+| U3 | Palette, fonts, outline/lighting conventions | **Resolved (Phase 2)** | DESIGN.md §3, §5, §6. Remaining design questions: DESIGN.md §24. |
 | U4 | Public hosting provider and who pays for AI usage | Before first public deploy | Single container on a small host with strict budget; static offline build on itch.io/GitHub Pages. |
-| U5 | Asset licence (MIT vs CC BY 4.0 for art/audio) | Before first art is committed (Phase 2/3) | MIT for code; decide whether art uses CC BY 4.0 for clearer attribution. |
+| U5 | Asset licence (MIT vs CC BY 4.0 for art/audio) | Before the first art is committed (Phase 3); Phase 2 added no art assets | MIT for code; decide whether art uses CC BY 4.0 for clearer attribution. |
 | U6 | Meta-progression across firings (unlocks, persistent perks) | Phase 7/8 | Start with lifetime stats only (`uog:career`). |
 | U7 | Default dialogue model | Phase 5 (eval) | `anthropic/claude-haiku-5.5`. |
 | U8 | TTS default and whether to offer in-browser Kokoro (`kokoro-js`, zero server cost, ~80+ MB download) | Phase 6 | OpenRouter Kokoro; consider in-browser as an optional "local voices" setting later. |
@@ -1440,6 +1448,9 @@ Append-only. Record any decision that changes this document (date, decision, rea
 | 2026-11-26 | Client-authoritative simulation; AI proposes, rules decide | Single-player; deterministic, testable, exploit-bounded | Server-authoritative state, AI-decided outcomes |
 | 2026-11-26 | `localStorage` saves with versioned envelope + migrations | Small saves; simplicity | IndexedDB, server saves |
 | 2026-11-26 | MIT licence | Permissive, simple, common for open-source games | Apache-2.0, GPL-3.0 |
+| 2026-11-26 | Logical resolution 480×270 (replaces the 640×360 recommendation) | Integer scales ×2–×6 fill 70–98% of common windowed viewports; 640×360 drops to ×1 on 1366×768 laptops | 640×360, 576×324, 320×180 |
+| 2026-11-26 | Fonts: Departure Mono (11 px) + Jersey 15 (27 px), both SIL OFL, self-hosted; Atkinson Hyperlegible Next as a readability option | Measured pixel-exact at those sizes; monospaced UI gives tabular numbers; no runtime dependency | Jersey 25, Silkscreen, Tiny5, Pixelify Sans, VT323, a custom bitmap font |
+| 2026-11-26 | 64-colour master palette; UI built from CSS borders and zero-blur inset shadows (no 9-slice images for DOM UI) | One palette for art and UI; fewer assets; crisp at every integer scale | Per-surface 9-slice PNGs, an off-the-shelf palette |
 
 ---
 
@@ -1448,4 +1459,5 @@ Append-only. Record any decision that changes this document (date, decision, rea
 | Area | Status |
 |---|---|
 | Documentation foundation | ✅ Phase 1 complete |
-| Everything else | ⏳ Not started — no source code exists yet |
+| Design system (DESIGN.md, `client/styles/tokens.css`, `art/palette/`, `design/reference/`) | ✅ Phase 2 complete. Tokens exist; no component, screen or art asset is implemented. |
+| Everything else | ⏳ Not started — no game code exists yet |

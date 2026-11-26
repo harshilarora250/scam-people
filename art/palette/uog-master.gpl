@@ -1,0 +1,69 @@
+GIMP Palette
+Name: uog-master
+Columns: 8
+# untitled-office-game master palette — 64 colours.
+# Source of truth: DESIGN.md §5.2 and client/styles/tokens.css. Do not edit one without the other.
+ 20  18  26	00 ink-0
+ 34  31  43	01 ink-1
+ 53  48  63	02 ink-2
+ 74  68  86	03 ink-3
+100  93 110	04 ink-4
+132 125 140	05 ink-5
+168 162 171	06 ink-6
+205 200 200	07 ink-7
+ 58  48  41	08 putty-0
+ 94  81  67	09 putty-1
+133 117  97	10 putty-2
+173 157 128	11 putty-3
+207 193 159	12 putty-4
+230 220 192	13 putty-5
+246 240 221	14 paper
+ 26  34  44	15 carpet-0
+ 40  54  70	16 carpet-1
+ 59  78  98	17 carpet-2
+ 85 105 127	18 carpet-3
+ 34  40  32	19 wall-0
+ 56  66  50	20 wall-1
+ 85  95  71	21 wall-2
+124 135  99	22 wall-3
+168 175 134	23 wall-4
+ 42  27  21	24 wood-0
+ 74  47  34	25 wood-1
+111  73  48	26 wood-2
+151 106  69	27 wood-3
+191 145  97	28 wood-4
+ 43  25  19	29 skin-edge
+180 124  93	30 skin-a0
+219 168 134	31 skin-a1
+243 207 174	32 skin-a2
+143  90  59	33 skin-b0
+185 125  85	34 skin-b1
+220 164 122	35 skin-b2
+ 97  58  36	36 skin-c0
+135  82  52	37 skin-c1
+173 113  73	38 skin-c2
+ 61  35  24	39 skin-d0
+ 86  51  33	40 skin-d1
+116  72  47	41 skin-d2
+125 100  32	42 hi-0
+226 189  58	43 hi-1
+251 233 138	44 hi-2
+110  53  22	45 amber-0
+212 115  42	46 amber-1
+242 166  90	47 amber-2
+ 87  24  32	48 red-0
+181  51  59	49 red-1
+232 104  93	50 red-2
+ 29  68  41	51 green-0
+ 47 115  64	52 green-1
+124 193 120	53 green-2
+ 23  64  63	54 teal-0
+ 45 133 128	55 teal-1
+108 202 189	56 teal-2
+ 43  35  80	57 violet-0
+ 90  74 158	58 violet-1
+156 141 224	59 violet-2
+143 168  48	60 lime-1
+200 222 106	61 lime-2
+176  74 114	62 rose-1
+228 141 170	63 rose-2

@@ -10,13 +10,13 @@ All organisations, people and scenarios in the game are fictional and satirical.
 
 ## Current status
 
-**Phase 1 — Foundation: complete.** The repository contains architecture, design and engineering documentation only. **There is no game code yet**, so nothing can be run.
+**Phase 2 — Design: complete.** The repository contains architecture, design and engineering documentation, the design tokens (`client/styles/tokens.css`), the master palette (`art/palette/`) and a visual reference page (`design/reference/index.html`). **There is no game code yet**, so the game cannot be run.
 
 | Phase | Focus | Status |
 |---|---|---|
 | 1 | Foundation: architecture, docs, configuration | ✅ Done |
-| 2 | Design: visual identity, design system, layouts, asset specs | ⏳ Next |
-| 3 | First playable build: office, locations, navigation, core UI | Planned |
+| 2 | Design: visual identity, design system, layouts, asset specs | ✅ Done |
+| 3 | First playable build: office, locations, navigation, core UI | ⏳ Next |
 | 4 | In-game computer and modular apps | Planned |
 | 5 | Characters and AI dialogue (OpenRouter) | Planned |
 | 6 | Phone system: calls, microphone, text-to-speech | Planned |
@@ -65,7 +65,10 @@ Reasoning for every choice: [ARCHITECTURE.md §2](ARCHITECTURE.md#2-technology-s
 | File | Purpose |
 |---|---|
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Technical source of truth: architecture, data models, AI/voice, saves, testing, roadmap |
-| [DESIGN.md](DESIGN.md) | Visual and interaction source of truth |
+| [DESIGN.md](DESIGN.md) | Visual and interaction source of truth: art direction, palette, type, components, screens, motion |
+| [client/styles/tokens.css](client/styles/tokens.css) | Design tokens (the only place raw colours and font names live) |
+| [art/palette/](art/palette/) | 64-colour master palette for art tools (`.gpl`, `.hex`) |
+| [design/reference/index.html](design/reference/index.html) | Rendered visual reference: palette, type, components, greybox screen mock-ups |
 | [AGENTS.md](AGENTS.md) | Mandatory rules for contributors and coding agents |
 | [.env.example](.env.example) | All server configuration variables with safe defaults |
 
@@ -93,6 +96,16 @@ cp .env.example .env
 ```
 
 Then edit `.env` (see below).
+
+### Viewing the design reference
+
+The reference page loads `client/styles/tokens.css` by relative path, so serve the repository root rather than opening the file directly:
+
+```bash
+python3 -m http.server 4517
+```
+
+Then open `http://localhost:4517/design/reference/index.html`. The page loads its fonts from public CDNs; the game itself will self-host them.
 
 ### Running the project
 

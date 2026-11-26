@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Reference — untitled-office-game</title>
+<!--
+  Visual reference for DESIGN.md. NOT game code.
+  - Uses only tokens from client/styles/tokens.css (no raw colours here).
+  - World art is GREYBOX (flat palette blocks), clearly labelled; final art follows DESIGN.md §3–4, §11, §21.
+  - Fonts: the game self-hosts fonts (DESIGN.md §21.3). This reference loads them from public CDNs for convenience only.
+-->
+<link rel="stylesheet" href="../../client/styles/tokens.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+15&family=Atkinson+Hyperlegible+Next&display=block">
+<style>
+@font-face {
+  font-family: 'Departure Mono';
+  src: url('https://cdn.jsdelivr.net/gh/rektdeckard/departure-mono@v1.500/public/assets/DepartureMono-Regular.woff2') format('woff2');
+  font-display: block;
+}
+
+/* ---------- page chrome (reference only) ---------- */
+:root { --px: 2px; }
+:root[data-scale="1"] { --px: 1px; } :root[data-scale="3"] { --px: 3px; }
+body {
+  margin: 0; background: var(--color-bg-app); color: var(--color-text-inverse);
+  font-family: var(--font-ui); font-size: var(--font-size-ui); line-height: var(--line-height-body);
+  font-synthesis: none; -webkit-font-smoothing: none; -moz-osx-font-smoothing: unset;
+}
+.page { padding: var(--sp-16) var(--sp-8); max-width: calc(var(--px) * 500); margin: 0 auto; }
+.page h1 { font: var(--font-size-title)/var(--line-height-title) var(--font-title); margin: 0 0 var(--sp-8); font-weight: 400; }
+.page h2 { font: var(--font-size-title)/var(--line-height-title) var(--font-title); font-weight: 400; margin: var(--sp-32) 0 var(--sp-8); color: var(--color-interact); }
+.page h3 { font-size: var(--font-size-ui); line-height: var(--line-height-tight); font-weight: 400; text-transform: uppercase; color: var(--color-text-inverse-muted); margin: var(--sp-16) 0 var(--sp-4); }
+.page p, .page li { color: var(--color-text-inverse-muted); max-width: calc(var(--px) * 440); margin: 0 0 var(--sp-6); }
+.page a { color: var(--color-interact); }
+.note { border: var(--border-1) solid var(--color-line-soft-inverse); padding: var(--sp-4) var(--sp-6); background: var(--color-bg-dark); }
+.scalebar { position: sticky; top: 0; z-index: 100; background: var(--color-bg-dark); border-bottom: var(--border-1) solid var(--color-line); padding: var(--sp-4) var(--sp-8); display: flex; gap: var(--sp-4); align-items: center; }
+.toc { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-8); }
+.row { display: flex; flex-wrap: wrap; gap: var(--sp-8); align-items: flex-start; margin-bottom: var(--sp-8); }
+.cap { display: block; color: var(--color-text-inverse-muted); margin-top: var(--sp-2); }
+.sheet { background: var(--color-bg-surface); color: var(--color-text); padding: var(--sp-8); border: var(--border-1) solid var(--color-line); }
+
+/* ---------- palette ---------- */
+.ramp { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-6); }
+.sw { width: calc(var(--px) * 52); }
+.sw i { display: block; height: calc(var(--px) * 24); border: var(--border-1) solid var(--color-line); background: var(--c); }
+.sw b, .sw small { display: block; font-weight: 400; font-size: var(--font-size-ui); line-height: var(--line-height-tight); }
+.sw small { color: var(--color-text-inverse-muted); }
+
+/* ---------- game frame ---------- */
+.game {
+  position: relative; isolation: isolate; overflow: hidden;
+  width: calc(var(--px) * 480); height: calc(var(--px) * 270);
+  background: var(--color-bg-app); color: var(--color-text);
+  font-family: var(--font-ui); font-size: var(--font-size-ui); line-height: var(--line-height-tight);
+  outline: var(--border-1) solid var(--color-line-soft-inverse); outline-offset: var(--sp-2);
+}
+.game * { box-sizing: border-box; }
+.abs { position: absolute; left: calc(var(--px) * var(--x, 0)); top: calc(var(--px) * var(--y, 0)); width: calc(var(--px) * var(--w)); height: calc(var(--px) * var(--h)); }
+.gb { background: var(--c); }
+.gbo { background: var(--c); border: var(--border-1) solid var(--o, var(--color-line)); }
+.greybox-tag { position: absolute; right: var(--sp-4); bottom: var(--sp-2); color: var(--color-text-inverse-muted); background: var(--color-bg-dark); padding: 0 var(--sp-2); z-index: 90; }
+.d25 { background-image: conic-gradient(var(--dc) 0 25%, transparent 0 100%); background-size: var(--sp-2) var(--sp-2); }
+.d50 { background: var(--dither-50); }
+.label-x { color: var(--color-text-inverse); text-transform: uppercase; }
+
+/* ---------- type ---------- */
+.t-title { font-family: var(--font-title); font-size: var(--font-size-title); line-height: var(--line-height-title); }
+.t-heading { font-family: var(--font-ui); font-size: var(--font-size-ui); line-height: var(--line-height-tight); text-transform: uppercase; color: var(--color-text); }
+.t-label { font-family: var(--font-ui); font-size: var(--font-size-ui); line-height: var(--line-height-tight); text-transform: uppercase; }
+.t-ui { font-family: var(--font-ui); font-size: var(--font-size-ui); line-height: var(--line-height-tight); }
+.t-body { font-family: var(--font-ui); font-size: var(--font-size-ui); line-height: var(--line-height-body); }
+.t-readable { font-family: var(--font-readable); font-size: var(--font-size-readable); line-height: var(--line-height-readable); }
+.muted { color: var(--color-text-muted); }
+.inv { color: var(--color-text-inverse); } .inv-muted { color: var(--color-text-inverse-muted); }
+
+/* ---------- frames ---------- */
+.raised { border: var(--border-1) solid var(--color-line); background: var(--face, var(--color-bg-surface));
+  --bevel: inset var(--px) var(--px) 0 0 var(--bl, var(--color-bevel-light)), inset calc(var(--px) * -1) calc(var(--px) * -1) 0 0 var(--bd, var(--color-bevel-dark));
+  box-shadow: var(--bevel); }
+.sunken { border: var(--border-1) solid var(--color-line); background: var(--face, var(--color-bg-surface-sunken));
+  box-shadow: inset var(--px) var(--px) 0 0 var(--color-bevel-dark), inset calc(var(--px) * -1) calc(var(--px) * -1) 0 0 var(--color-bevel-light); }
+.flat { border: var(--border-1) solid var(--color-line); background: var(--face, var(--color-bg-surface-sunken)); }
+.float { position: relative; z-index: 1; }
+.abs.float { position: absolute; }
+.float::before { content: ''; position: absolute; z-index: -1; pointer-events: none;
+  top: var(--px); left: var(--px); right: calc(var(--px) * -3); bottom: calc(var(--px) * -3);
+  background: var(--dither-50-shadow);
+  clip-path: polygon(calc(100% - var(--sp-2)) 0, 100% 0, 100% 100%, 0 100%, 0 calc(100% - var(--sp-2)), calc(100% - var(--sp-2)) calc(100% - var(--sp-2))); }
+.dark { --face: var(--color-bg-dark); color: var(--color-text-inverse); }
+
+/* ---------- buttons ---------- */
+.btn { --face: var(--color-secondary); --face-h: var(--color-secondary-hover); --face-p: var(--color-secondary-pressed);
+  --bl: var(--color-secondary-bevel-light); --bd: var(--color-secondary-bevel-dark); --fg: var(--color-on-secondary);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-4);
+  height: var(--size-button-height); min-width: var(--size-button-min-width); padding: 0 var(--sp-6);
+  font: inherit; font-size: var(--font-size-ui); line-height: var(--line-height-tight); color: var(--fg); cursor: pointer; white-space: nowrap;
+  border: var(--border-1) solid var(--color-line); background: var(--face);
+  --bevel: inset var(--px) var(--px) 0 0 var(--bl), inset calc(var(--px) * -1) calc(var(--px) * -1) 0 0 var(--bd);
+  box-shadow: var(--bevel); }
+.btn > span { display: inline-block; }
+.btn.lg { height: var(--size-button-height-large); min-width: calc(var(--px) * 46); }
+.btn.icon { min-width: var(--size-icon-md); width: var(--size-icon-md); padding: 0; }
+.btn.primary { --face: var(--color-primary); --face-h: var(--color-primary-hover); --face-p: var(--color-primary-pressed); --bl: var(--color-primary-bevel-light); --bd: var(--color-primary-bevel-dark); --fg: var(--color-on-primary); }
+.btn.danger { --face: var(--color-danger); --face-h: var(--color-danger); --face-p: var(--color-danger-pressed); --bl: var(--color-danger-bevel-light); --bd: var(--color-danger-bevel-dark); --fg: var(--color-on-danger); }
+.btn.go { --face: var(--color-go); --face-h: var(--color-go); --face-p: var(--color-go-pressed); --bl: var(--color-go-bevel-light); --bd: var(--color-go-bevel-dark); --fg: var(--color-on-go); }
+.btn.ghost { background: transparent; border-color: transparent; box-shadow: none; text-decoration: underline; text-underline-offset: var(--sp-2); padding: 0 var(--sp-2); min-width: 0; }
+.btn:hover, .btn.is-hover { border-color: var(--color-interact); background: var(--face-h); }
+.btn:active, .btn.is-pressed { background: var(--face-p);
+  box-shadow: inset var(--px) var(--px) 0 0 var(--bd), inset calc(var(--px) * -1) calc(var(--px) * -1) 0 0 var(--bl); }
+.btn:active > span, .btn.is-pressed > span { transform: translateY(var(--px)); }
+.btn:focus-visible, .btn.is-focus { outline: var(--border-1) solid var(--color-focus); outline-offset: 0;
+  box-shadow: var(--bevel), 0 0 0 calc(var(--px) * 2) var(--color-focus-outer); }
+.btn:disabled, .btn.is-disabled { background: var(--color-disabled-face); color: var(--color-on-disabled); border-color: var(--color-on-disabled); box-shadow: none; cursor: not-allowed; }
+.btn.is-confirm { background: var(--color-interact-light); color: var(--color-text); }
+
+/* ---------- icons (greybox placeholders) ---------- */
+.ico { display: inline-block; flex: none; width: var(--size-icon-sm); height: var(--size-icon-sm); background: var(--ic, var(--color-text-inverse-muted)); border: var(--border-1) solid var(--color-line); vertical-align: top; }
+.ico.md { width: var(--size-icon-md); height: var(--size-icon-md); }
+.ico.lg { width: var(--size-icon-lg); height: var(--size-icon-lg); }
+
+/* ---------- meters ---------- */
+.meter { display: inline-flex; gap: var(--px); padding: var(--px); background: var(--color-bg-well); vertical-align: top; position: relative; }
+.meter i { width: calc(var(--px) * 3); height: calc(var(--px) * 7); background: var(--color-meter-empty); }
+.meter.lg i { width: calc(var(--px) * 6); }
+.meter.stat i { width: calc(var(--px) * 6); height: calc(var(--px) * 5); }
+.meter i.on { background: var(--f); box-shadow: inset 0 calc(var(--px) * -1) 0 0 var(--s); }
+.meter i.fz { background: repeating-conic-gradient(var(--f) 0 25%, var(--color-meter-empty) 0 50%) 0 0 / var(--sp-2) var(--sp-2); }
+.meter .tick { position: absolute; top: calc(var(--px) * -1); bottom: calc(var(--px) * -1); width: var(--px); background: var(--color-meter-threshold); }
+.m-energy { --f: var(--color-meter-energy); --s: var(--color-meter-energy-shade); }
+.m-energy-low { --f: var(--color-meter-energy-low); --s: var(--color-meter-energy-low-shade); }
+.m-energy-crit { --f: var(--color-meter-energy-critical); --s: var(--color-meter-energy-critical-shade); }
+.m-sleep { --f: var(--color-meter-sleepiness); --s: var(--color-meter-sleepiness-shade); }
+.m-trust { --f: var(--color-meter-trust); --s: var(--color-meter-trust-shade); }
+.m-susp { --f: var(--color-meter-suspicion); --s: var(--color-meter-suspicion-shade); }
+.m-pat { --f: var(--color-meter-patience); --s: var(--color-meter-patience-shade); }
+.m-caf { --f: var(--color-meter-caffeine); --s: var(--color-meter-caffeine-shade); }
+.bar { display: inline-block; height: calc(var(--px) * 5); border: var(--border-1) solid var(--color-line); background: var(--color-meter-empty); position: relative; vertical-align: middle; }
+.bar > b { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--px) * var(--v)); background: var(--color-meter-progress); box-shadow: inset 0 calc(var(--px) * -1) 0 0 var(--color-meter-progress-shade); }
+.pips { display: inline-flex; gap: var(--px); vertical-align: middle; }
+.pips i { width: calc(var(--px) * 5); height: calc(var(--px) * 5); background: var(--pe, var(--color-meter-empty)); }
+.pips i.on { background: var(--pf, var(--color-meter-progress)); }
+.pips.caf i { width: calc(var(--px) * 3); }
+.led { display: inline-block; width: calc(var(--px) * 7); height: calc(var(--px) * 7); background: var(--color-line); position: relative; vertical-align: middle; }
+.led::after { content: ''; position: absolute; inset: var(--px); background: var(--lc, var(--color-led-off));
+  clip-path: polygon(20% 0, 80% 0, 80% 20%, 100% 20%, 100% 80%, 80% 80%, 80% 100%, 20% 100%, 20% 80%, 0 80%, 0 20%, 20% 20%); }
+.badge { display: inline-block; height: var(--size-icon-sm); min-width: var(--size-icon-sm); padding: 0 var(--sp-2); background: var(--color-badge); color: var(--color-on-badge); border: var(--border-1) solid var(--color-line); font-size: var(--font-size-ui); line-height: calc(var(--px) * 7); text-align: center; }
+
+/* ---------- inputs ---------- */
+.input { display: inline-flex; align-items: center; height: var(--size-input-height); padding: 0 var(--sp-4); color: var(--color-text); }
+.input.lg { height: var(--size-button-height-large); }
+.input .ph { color: var(--color-text-muted); }
+.input.is-focus { outline: var(--border-1) solid var(--color-focus); box-shadow: inset var(--px) var(--px) 0 0 var(--color-bevel-dark), 0 0 0 calc(var(--px) * 2) var(--color-focus-outer); }
+.input.is-error { border-color: var(--color-status-danger-on-light); }
+.input.is-disabled { --face: var(--color-bg-surface); color: var(--color-text-disabled); }
+.caret { display: inline-block; width: var(--px); height: calc(var(--px) * 11); background: var(--color-text); margin-left: var(--px); }
+.check { display: inline-block; width: var(--size-icon-sm); height: var(--size-icon-sm); position: relative; vertical-align: top; }
+.check.on::after { content: ''; position: absolute; left: var(--px); top: var(--px); width: calc(var(--px) * 5); height: calc(var(--px) * 5); background: var(--color-status-success-on-light); }
+.check.fail::after { content: ''; position: absolute; left: var(--px); top: var(--px); width: calc(var(--px) * 5); height: calc(var(--px) * 5); background: var(--color-status-danger-on-light); }
+.tabs { display: flex; align-items: flex-end; }
+.tab { height: calc(var(--px) * 14); padding: 0 var(--sp-6); border: var(--border-1) solid var(--color-line); border-bottom: 0; background: var(--color-bg-surface-raised); margin-right: calc(var(--px) * -1); display: inline-flex; align-items: center; }
+.tab.on { background: var(--color-bg-surface); box-shadow: inset 0 var(--px) 0 0 var(--color-interact); height: calc(var(--px) * 15); }
+.kbd { display: inline-block; height: calc(var(--px) * 11); min-width: calc(var(--px) * 11); padding: 0 var(--sp-2); line-height: calc(var(--px) * 9); font-size: var(--font-size-ui); text-transform: uppercase; color: var(--color-text); }
+
+/* ---------- misc components ---------- */
+.lcd { --face: var(--color-lcd-bg); color: var(--color-lcd-text); padding: var(--sp-2) var(--sp-4); text-transform: uppercase; }
+.toast { --face: var(--color-bg-dark); color: var(--color-text-inverse); width: var(--size-toast-width); height: calc(var(--px) * 24); position: relative; }
+.toast .stripe { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--px) * 2); background: var(--st); }
+.toast .ico { position: absolute; left: calc(var(--px) * 6); top: calc(var(--px) * 3); --ic: var(--st); }
+.toast .tt { position: absolute; left: calc(var(--px) * 26); top: calc(var(--px) * 0); text-transform: uppercase; }
+.toast .tb { position: absolute; left: calc(var(--px) * 26); top: calc(var(--px) * 10); color: var(--color-text-inverse-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; right: var(--sp-4); }
+.tooltip { --face: var(--color-bg-dark); color: var(--color-text-inverse); padding: var(--sp-2) var(--sp-4); max-width: var(--size-tooltip-max-width); }
+.card { --face: var(--color-bg-surface-sunken); }
+.card .hd { height: calc(var(--px) * 14); padding: var(--px) var(--sp-6) 0; text-transform: uppercase; }
+.card .rule { height: var(--px); background: var(--color-index-rule); margin: var(--sp-2) 0 0; }
+.card .bd { padding: var(--sp-4) var(--sp-6); }
+.stamp { display: inline-flex; align-items: center; justify-content: center; width: calc(var(--px) * 96); height: calc(var(--px) * 28); border: calc(var(--px) * 2) solid var(--sc); box-shadow: inset 0 0 0 var(--px) var(--color-bg-surface-sunken), inset 0 0 0 calc(var(--px) * 2) var(--sc); color: var(--sc); font-family: var(--font-title); font-size: var(--font-size-title); line-height: var(--line-height-title); text-transform: uppercase; }
+.stamp.sm { width: calc(var(--px) * 48); height: calc(var(--px) * 14); border-width: var(--px); box-shadow: none; font-family: var(--font-ui); font-size: var(--font-size-ui); }
+.portrait { padding: var(--px); display: inline-block; vertical-align: top; }
+.portrait .bg { position: relative; width: var(--size-portrait); height: var(--size-portrait); background: var(--rb); overflow: hidden; box-shadow: inset 0 0 0 var(--px) var(--color-line); }
+.portrait.thumb { padding: 0; border: var(--border-1) solid var(--color-line); }
+.portrait.thumb .bg { width: var(--size-portrait-thumb); height: var(--size-portrait-thumb); box-shadow: none; }
+.face > * { position: absolute; }
+.plate { --face: var(--color-bg-dark); color: var(--color-text-inverse); height: calc(var(--px) * 14); padding: var(--px) var(--sp-4) 0; }
+.tape { background: var(--color-tape); border: var(--border-1) solid var(--color-line); position: relative; }
+.tape::before, .tape::after { content: ''; position: absolute; top: 0; bottom: 0; width: calc(var(--px) * 6); background-color: var(--color-tape-margin);
+  background-image: repeating-linear-gradient(to bottom, var(--color-tape-hole) 0 var(--sp-2), transparent var(--sp-2) var(--sp-8));
+  background-size: var(--sp-2) 100%; background-repeat: no-repeat; background-position: var(--sp-2) var(--sp-4); }
+.tape::before { left: 0; border-right: var(--border-1) solid var(--color-line-soft); }
+.tape::after { right: 0; border-left: var(--border-1) solid var(--color-line-soft); }
+.tape .holes { display: none; }
+.tl { display: flex; } .tl .who { width: calc(var(--px) * 49); flex: none; text-transform: uppercase; }
+.who.c { color: var(--color-text-link); } .who.p { color: var(--color-text-muted); }
+.sysline { text-align: center; color: var(--color-text-muted); text-transform: uppercase; }
+.state { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); text-align: center; padding: var(--sp-8); width: calc(var(--px) * 150); }
+.list .r { height: calc(var(--px) * 28); padding: var(--px) var(--sp-4); border-bottom: var(--border-1) solid var(--color-line-soft); position: relative; }
+.list .r.sel { background: var(--color-interact-light); }
+.list .r .led { position: absolute; right: var(--sp-4); top: calc(var(--px) * 10); }
+.zebra > div { height: var(--size-row); padding: var(--px) var(--sp-4) 0; display: flex; justify-content: space-between; }
+.zebra > div:nth-child(even) { background: var(--color-bg-zebra); }
+.hatch { background-color: var(--color-os-titlebar);
+  background-image: repeating-linear-gradient(135deg, var(--color-os-titlebar-hatch) 0 var(--px), transparent var(--px) calc(var(--px) * 3)); }
+.hotspot-hover { outline: var(--border-1) solid var(--color-interact); outline-offset: var(--px); }
+.brackets { position: absolute; }
+.brackets i { position: absolute; width: calc(var(--px) * 3); height: calc(var(--px) * 3); border: 0 solid var(--color-interact); }
+.brackets i:nth-child(1) { left: 0; top: 0; border-left-width: var(--px); border-top-width: var(--px); }
+.brackets i:nth-child(2) { right: 0; top: 0; border-right-width: var(--px); border-top-width: var(--px); }
+.brackets i:nth-child(3) { left: 0; bottom: 0; border-left-width: var(--px); border-bottom-width: var(--px); }
+.brackets i:nth-child(4) { right: 0; bottom: 0; border-right-width: var(--px); border-bottom-width: var(--px); }
+.vig { position: absolute; inset: 0; z-index: var(--z-effects); pointer-events: none; }
+.ring { position: absolute; inset: var(--in); background-size: var(--sp-2) var(--sp-2);
+  clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, var(--sp-16) var(--sp-16), var(--sp-16) calc(100% - var(--sp-16)), calc(100% - var(--sp-16)) calc(100% - var(--sp-16)), calc(100% - var(--sp-16)) var(--sp-16), var(--sp-16) var(--sp-16)); }
+.ring.r50 { background-image: repeating-conic-gradient(var(--color-bg-overlay) 0 25%, transparent 0 50%); }
+.ring.r25 { background-image: conic-gradient(var(--color-bg-overlay) 0 25%, transparent 0 100%); }
+.fontcheck td { padding: 0 var(--sp-6) 0 0; }
+</style>
+</head>
+<body>
+<div class="scalebar">
+  <span class="t-label inv-muted">Scale</span>
+  <button class="btn" data-scale="1"><span>×1</span></button>
+  <button class="btn primary" data-scale="2"><span>×2</span></button>
+  <button class="btn" data-scale="3"><span>×3</span></button>
+  <span class="inv-muted">1 lpx = <span id="pxv">2</span> CSS px</span>
+</div>
+<div class="page">
+  <h1>Design Reference</h1>
+  <p class="note">Visual companion to <a href="../../DESIGN.md">DESIGN.md</a>. Every colour, size and font on this page comes from <code>client/styles/tokens.css</code>. World art is <b>greybox</b> (flat palette blocks marking position and footprint), not final pixel art. Icons are placeholder squares in their intended colour. Stamps and the hatch are CSS approximations of sprites.</p>
+  <nav class="toc">
+    <a href="#palette">Palette</a><a href="#type">Type</a><a href="#components">Components</a>
+    <a href="#s-office">Office + HUD</a><a href="#s-desk">Desk + ringing</a><a href="#s-today">Computer: Today</a>
+    <a href="#s-cardfile">Computer: Card File</a><a href="#s-call">Active call</a><a href="#s-report">Call report</a>
+    <a href="#s-review">Review</a><a href="#s-gameover">Game over</a><a href="#s-sleepy">Sleepiness + pause</a>
+  </nav>
+
+  <!-- =============================== PALETTE =============================== -->
+  <h2 id="palette">Master palette (64) — DESIGN.md §5</h2>
+  <div id="palette-out"></div>
+
+  <!-- =============================== TYPE =============================== -->
+  <h2 id="type">Typography — DESIGN.md §6</h2>
+  <div class="sheet">
+    <div class="t-title">DAY 04</div><span class="cap muted">text-title · Jersey 15 at 27 / 28 (15 lpx capitals)</span>
+    <div class="t-heading">Card File — Mavis Thornbury</div><span class="cap muted">text-heading · Departure Mono 11 / 12 · capitals · full contrast</span>
+    <div class="t-label">Quota · Balance · Trust 0123456789</div><span class="cap muted">text-label · Departure Mono 11 / 12 · capitals</span>
+    <div class="t-ui">Answer · Hang up · File report · 1,240 · 10:42 · 03:12</div><span class="cap muted">text-ui · Departure Mono 11 / 12</span>
+    <div class="t-body" style="max-width: calc(var(--px) * 308)">Body text wraps at 44 characters. Il1| O0o — the quick brown fox files a form in triplicate and is told to resubmit.</div><span class="cap muted">text-body · Departure Mono 11 / 14</span>
+    <div class="t-readable" style="max-width: calc(var(--px) * 308)">Readable-font option: running text switches to Atkinson Hyperlegible Next 11 / 16.</div><span class="cap muted">readable fallback (setting only)</span>
+  </div>
+  <h3>Font check (measured in this browser — DESIGN.md §24 D12)</h3>
+  <table class="fontcheck inv" id="fontcheck"></table>
+
+  <!-- =============================== COMPONENTS =============================== -->
+  <h2 id="components">Components — DESIGN.md §14</h2>
+  <div class="sheet">
+    <h3 style="margin-top:0">Buttons: variants × states (16 lpx)</h3>
+    <div id="btn-matrix"></div>
+    <div class="row" style="margin-top: var(--sp-8)">
+      <button class="btn lg go"><span>Answer</span></button>
+      <button class="btn lg danger"><span>Decline</span></button>
+      <button class="btn lg primary"><span>Send</span></button>
+      <button class="btn icon" aria-label="Menu"><i class="ico"></i></button>
+      <button class="btn ghost"><span>Open memo</span></button>
+      <button class="btn is-confirm"><span>Confirm 120</span></button>
+      <button class="btn primary"><span>▒ ▒ ▒</span></button>
+    </div>
+    <span class="cap muted">Large (20 lpx) · icon-only 16×16 · ghost · confirm-inline · loading</span>
+
+    <h3>Inputs, checkbox, tabs, key hints</h3>
+    <div class="row">
+      <span class="input sunken" style="width: calc(var(--px) * 120)"><span class="ph">Type a reply…</span></span>
+      <span class="input sunken is-focus" style="width: calc(var(--px) * 120)">Good morning<i class="caret"></i></span>
+      <span class="input sunken is-error" style="width: calc(var(--px) * 120)">???</span>
+      <span class="input sunken is-disabled" style="width: calc(var(--px) * 80)">Disabled</span>
+    </div>
+    <div class="row">
+      <span><i class="check sunken"></i> <span class="t-ui">Make 3 calls</span></span>
+      <span><i class="check sunken on"></i> <span class="t-ui muted">Drink coffee</span></span>
+      <span><i class="check sunken fail"></i> <span class="t-ui">No naps</span></span>
+      <span class="kbd raised">Enter</span> <span class="kbd raised">Esc</span> <span class="kbd raised">Ctrl</span> <span class="kbd raised">H</span>
+    </div>
+    <div class="tabs"><span class="tab on">All</span><span class="tab">Regulars</span><span class="tab">New</span><span class="tab">Burned</span></div>
+    <div class="raised" style="height: calc(var(--px) * 8); border-top: 0"></div>
+
+    <h3>Index card, LCD, stamps</h3>
+    <div class="row">
+      <div class="card flat" style="width: calc(var(--px) * 150)"><div class="hd">Today's quota</div><div class="rule"></div><div class="bd"><span class="t-title">3/8</span><br><span class="bar" style="width: calc(var(--px) * 138); --v: 51"><b></b></span></div></div>
+      <div class="lcd sunken" style="width: calc(var(--px) * 132)">Incoming call<br>Mavis Thornbury<br>Regular · 3 calls</div>
+      <div>
+        <span class="stamp" style="--sc: var(--color-stamp-good)">Agreed</span><br>
+        <span class="stamp" style="--sc: var(--color-stamp-bad); margin-top: var(--sp-4)">Hung up</span><br>
+        <span class="stamp sm" style="--sc: var(--color-stamp-neutral); margin-top: var(--sp-4)">ENDED</span>
+      </div>
+    </div>
+    <span class="cap muted">Stamps here are CSS stand-ins for the 96×28 / 48×14 sprites.</span>
+  </div>
+
+  <div class="sheet dark" style="background: var(--color-bg-dark); color: var(--color-text-inverse); margin-top: var(--sp-8)">
+    <h3 style="margin-top:0">Meters (on dark)</h3>
+    <div id="meters"></div>
+    <h3>Continuous bar, pips, LEDs, badge</h3>
+    <div class="row">
+      <span class="bar" style="width: calc(var(--px) * 40); --v: 15"><b></b></span>
+      <span class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>
+      <span class="pips caf" style="--pf: var(--color-meter-caffeine)"><i class="on"></i><i class="on"></i><i></i></span>
+      <span class="led" style="--lc: var(--color-status-success)"></span> <span class="led" style="--lc: var(--color-status-warning)"></span> <span class="led" style="--lc: var(--color-led-ring)"></span> <span class="led"></span>
+      <span class="badge">3</span> <span class="badge">9+</span>
+    </div>
+    <h3>Toasts (160 wide) and tooltip</h3>
+    <div class="row">
+      <div class="toast flat float" style="--st: var(--color-status-info)"><span class="stripe"></span><i class="ico md"></i><span class="tt">Missed call</span><span class="tb">Mavis Thornbury rang off.</span></div>
+      <div class="toast flat float" style="--st: var(--color-status-success)"><span class="stripe"></span><i class="ico md"></i><span class="tt">Objective done</span><span class="tb">Make 3 calls.</span></div>
+    </div>
+    <div class="row">
+      <div class="toast flat float" style="--st: var(--color-status-warning)"><span class="stripe"></span><i class="ico md"></i><span class="tt">Footsteps…</span><span class="tb">Management approaches.</span></div>
+      <div class="toast flat float" style="--st: var(--color-status-danger)"><span class="stripe"></span><i class="ico md"></i><span class="tt">Strike 2 of 3</span><span class="tb">Rude to a caller.</span></div>
+    </div>
+    <div class="tooltip flat float t-ui" style="display: inline-block">Coffee machine — Make coffee</div>
+    <h3>State panels (light surface)</h3>
+    <div class="row" style="background: var(--color-bg-surface-sunken); color: var(--color-text); padding: var(--sp-4)">
+      <div class="state"><i class="ico"></i><span class="t-ui">Opening folder…</span></div>
+      <div class="state"><i class="ico lg"></i><span class="t-ui">No memos.</span><span class="t-body muted">Enjoy it while it lasts.</span></div>
+      <div class="state"><i class="ico" style="--ic: var(--color-status-danger-on-light)"></i><span class="t-ui">Paper jam.</span><span class="t-body muted">The memos could not be fetched.</span><button class="btn"><span>Try again</span></button></div>
+      <div class="state"><i class="ico lg"></i><span class="t-ui">Locked</span><span class="t-body muted">Available from day 5.</span></div>
+    </div>
+    <h3>Portrait frames by role (68×68) + thumbnail (34×34) + name plate</h3>
+    <div class="row" id="portraits"></div>
+  </div>
+
+  <!-- =============================== SCREENS =============================== -->
+  <h2 id="s-office">Office floor + HUD + hover + toast — §8, §12</h2>
+  <div class="game" data-hud id="g-office">
+    <div class="abs gb" style="--y:0;--w:480;--h:20;--c:var(--pal-putty-4)"></div>
+    <div class="abs gb" style="--y:20;--w:480;--h:120;--c:var(--pal-wall-2)"></div>
+    <div class="abs gb" style="--y:110;--w:480;--h:2;--c:var(--pal-putty-3)"></div>
+    <div class="abs gb d25" style="--y:140;--w:480;--h:130;--c:var(--pal-carpet-2);--dc:var(--pal-carpet-1)"></div>
+    <!-- back wall -->
+    <div class="abs gbo" style="--x:16;--y:50;--w:41;--h:90;--c:var(--pal-wood-2);--o:var(--pal-wood-0)"></div>
+    <div class="abs gb" style="--x:22;--y:58;--w:29;--h:34;--c:var(--pal-ink-6)"></div>
+    <div class="abs gb t-label" style="--x:20;--y:96;--w:33;--h:7;--c:var(--pal-putty-4);font-size:0"></div>
+    <div class="abs gbo" style="--x:60;--y:60;--w:57;--h:50;--c:var(--pal-ink-5);--o:var(--pal-putty-0)"></div>
+    <div class="abs gb" style="--x:84;--y:78;--w:10;--h:24;--c:var(--pal-ink-3)"></div>
+    <div class="abs gb" style="--x:124;--y:64;--w:33;--h:76;--c:var(--pal-putty-3)"></div>
+    <div class="abs gbo t-label" style="--x:176;--y:40;--w:41;--h:53;--c:var(--color-bg-surface-sunken);padding:4px;font-size:0"></div>
+    <div class="abs gb" style="--x:180;--y:48;--w:33;--h:20;--c:var(--pal-carpet-3)"></div>
+    <div class="abs gbo" style="--x:222;--y:40;--w:16;--h:16;--c:var(--color-bg-surface-sunken)"></div>
+    <div class="abs gbo" style="--x:252;--y:44;--w:65;--h:49;--c:var(--pal-carpet-3);--o:var(--pal-putty-0)"></div>
+    <div class="abs gbo" style="--x:340;--y:116;--w:21;--h:44;--c:var(--pal-carpet-3);--o:var(--pal-carpet-0)"></div>
+    <!-- doorway: hovered -->
+    <div class="abs gb hotspot-hover" style="--x:392;--y:50;--w:49;--h:90;--c:var(--pal-ink-1)"></div>
+    <div class="abs gb" style="--x:448;--y:40;--w:22;--h:8;--c:var(--pal-green-1)"></div>
+    <!-- cubicles back row + coworkers -->
+    <div class="abs gb" style="--x:186;--y:104;--w:12;--h:12;--c:var(--pal-skin-b1)"></div>
+    <div class="abs gb" style="--x:182;--y:116;--w:20;--h:8;--c:var(--pal-teal-1)"></div>
+    <div class="abs gb" style="--x:270;--y:104;--w:12;--h:12;--c:var(--pal-skin-d2)"></div>
+    <div class="abs gb" style="--x:266;--y:116;--w:20;--h:8;--c:var(--pal-amber-1)"></div>
+    <div class="abs gbo" style="--x:150;--y:118;--w:81;--h:48;--c:var(--pal-wall-1);--o:var(--pal-wall-0)"></div>
+    <div class="abs gbo" style="--x:240;--y:118;--w:81;--h:48;--c:var(--pal-wall-1);--o:var(--pal-wall-0)"></div>
+    <!-- front row: player's back seated -->
+    <div class="abs gb" style="--x:232;--y:158;--w:14;--h:14;--c:var(--pal-wood-2)"></div>
+    <div class="abs gb" style="--x:228;--y:170;--w:22;--h:6;--c:var(--pal-ink-5)"></div>
+    <div class="abs gbo" style="--x:70;--y:172;--w:101;--h:57;--c:var(--pal-wall-2);--o:var(--pal-wall-0)"></div>
+    <div class="abs gbo" style="--x:190;--y:172;--w:101;--h:57;--c:var(--pal-wall-2);--o:var(--pal-wall-0)"></div>
+    <div class="abs gbo" style="--x:300;--y:172;--w:101;--h:57;--c:var(--pal-wall-2);--o:var(--pal-wall-0)"></div>
+    <div class="abs gb" style="--x:120;--y:160;--w:12;--h:14;--c:var(--pal-wall-3)"></div>
+    <!-- boss walking, front aisle (feet y 258) -->
+    <div class="abs" style="--x:96;--y:202;--w:32;--h:56">
+      <div class="abs gbo" style="--x:10;--y:8;--w:12;--h:12;--c:var(--pal-skin-a1);--o:var(--pal-skin-edge)"></div>
+      <div class="abs gbo" style="--x:8;--y:21;--w:16;--h:18;--c:var(--pal-red-0);--o:var(--pal-ink-0)"></div>
+      <div class="abs gbo" style="--x:10;--y:39;--w:12;--h:17;--c:var(--pal-ink-2);--o:var(--pal-ink-0)"></div>
+    </div>
+    <!-- UI: exit tabs, location label, tooltip, toast -->
+    <div class="abs flat dark" style="--x:0;--y:164;--w:14;--h:32"><i class="ico" style="margin: calc(var(--px)*11) 0 0 calc(var(--px)*2); --ic: var(--color-text-inverse)"></i></div>
+    <div class="abs flat dark" style="--x:466;--y:164;--w:14;--h:32"><i class="ico" style="margin: calc(var(--px)*11) 0 0 calc(var(--px)*2); --ic: var(--color-text-inverse)"></i></div>
+    <div class="abs flat dark t-label" style="--x:4;--y:24;padding:0 var(--sp-4);height:calc(var(--px)*14)">Office floor</div>
+    <div class="abs tooltip flat float t-ui" style="--x:330;--y:146">Break room — Go</div>
+    <div class="abs toast flat float" style="--x:316;--y:24;--st: var(--color-status-warning)"><span class="stripe"></span><i class="ico md"></i><span class="tt">Footsteps…</span><span class="tb">Boss incoming.</span></div>
+    <span class="greybox-tag">GREYBOX</span>
+  </div>
+
+  <h2 id="s-desk">Desk view + incoming call tray — §8.2, §10.2</h2>
+  <div class="game" data-hud id="g-desk">
+    <div class="abs gb" style="--y:0;--w:480;--h:170;--c:var(--pal-wall-2)"></div>
+    <div class="abs gb" style="--y:170;--w:480;--h:8;--c:var(--pal-wood-3)"></div>
+    <div class="abs gb" style="--y:178;--w:480;--h:92;--c:var(--pal-wood-2)"></div>
+    <div class="abs gbo" style="--x:30;--y:40;--w:30;--h:30;--c:var(--color-bg-surface-sunken)"></div>
+    <div class="abs gbo" style="--x:400;--y:44;--w:34;--h:24;--c:var(--pal-carpet-3)"></div>
+    <!-- monitor -->
+    <div class="abs gbo" style="--x:120;--y:36;--w:208;--h:140;--c:var(--pal-putty-3);--o:var(--pal-putty-0)"></div>
+    <div class="abs gb" style="--x:132;--y:46;--w:184;--h:114;--c:var(--pal-carpet-1)"></div>
+    <div class="abs gb d25" style="--x:132;--y:46;--w:184;--h:114;--c:transparent;--dc:var(--pal-carpet-0)"></div>
+    <div class="abs gbo" style="--x:200;--y:176;--w:48;--h:16;--c:var(--pal-putty-2);--o:var(--pal-putty-0)"></div>
+    <!-- phone (ringing frame) -->
+    <div class="abs gbo" style="--x:344;--y:176;--w:96;--h:56;--c:var(--pal-putty-4);--o:var(--pal-putty-0)"></div>
+    <div class="abs gb" style="--x:352;--y:182;--w:60;--h:10;--c:var(--color-lcd-bg)"></div>
+    <div class="abs gb" style="--x:424;--y:182;--w:5;--h:5;--c:var(--color-led-ring)"></div>
+    <!-- mug, in-tray -->
+    <div class="abs gbo" style="--x:56;--y:194;--w:16;--h:16;--c:var(--color-bg-surface-sunken);--o:var(--pal-putty-0)"></div>
+    <div class="abs gbo" style="--x:8;--y:200;--w:40;--h:20;--c:var(--pal-ink-5);--o:var(--pal-ink-0)"></div>
+    <div class="abs flat dark t-ui" style="--x:184;--y:254;--w:112;--h:16;padding:var(--px) var(--sp-6) 0;display:flex;gap:var(--sp-4)"><i class="ico" style="--ic:var(--color-text-inverse);margin-top:var(--px)"></i>Office floor</div>
+    <!-- phone tray -->
+    <div class="abs raised float" style="--x:332;--y:148;--w:144;--h:118;--face:var(--color-phone-body)">
+      <span class="abs t-label" style="--x:3;--y:1;color:var(--pal-ink-3)">Line 1</span>
+      <span class="abs led" style="--x:130;--y:3;--lc:var(--color-led-ring)"></span>
+      <div class="abs lcd sunken t-label" style="--x:5;--y:15;--w:132;--h:38;padding:0 var(--sp-4)">Incoming call<br>Mavis Thornbury<br>Regular · 3 calls</div>
+      <div class="abs" style="--x:5;--y:55"><div class="portrait thumb" data-role="contact"></div></div>
+      <span class="abs t-label" style="--x:43;--y:57;color:var(--pal-ink-3)">Rings</span>
+      <span class="abs pips" style="--x:43;--y:73;padding:var(--px);background:var(--color-bg-dark)"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>
+      <button class="abs btn lg go" style="--x:5;--y:91;--w:64"><span>Answer</span></button>
+      <button class="abs btn lg danger is-focus" style="--x:73;--y:91;--w:64"><span>Decline</span></button>
+    </div>
+    <span class="greybox-tag">GREYBOX</span>
+  </div>
+
+  <h2 id="s-today">Computer: Today (Document template) — §9.1–9.6</h2>
+  <div class="game" data-hud id="g-today">
+    <div class="abs gb" style="--y:20;--w:480;--h:250;--c:var(--color-os-bezel)"></div>
+    <div class="abs gb d25" style="--x:6;--y:24;--w:468;--h:240;--c:var(--color-os-desktop);--dc:var(--color-os-desktop-pattern)"></div>
+    <div class="abs gb" style="--x:452;--y:265;--w:3;--h:2;--c:var(--pal-green-2)"></div>
+    <div id="win-today"></div>
+  </div>
+
+  <h2 id="s-cardfile">Computer: Card File (List/detail template) — §9.4, §9.6</h2>
+  <div class="game" data-hud id="g-card">
+    <div class="abs gb" style="--y:20;--w:480;--h:250;--c:var(--color-os-bezel)"></div>
+    <div class="abs gb d25" style="--x:6;--y:24;--w:468;--h:240;--c:var(--color-os-desktop);--dc:var(--color-os-desktop-pattern)"></div>
+    <div id="win-card"></div>
+  </div>
+
+  <h2 id="s-call">Active call console (degraded line shown) — §10.4–10.7</h2>
+  <div class="game" data-hud id="g-call">
+    <div class="abs gb" style="--y:20;--w:480;--h:250;--c:var(--pal-wall-2)"></div>
+    <div class="abs d50" style="--y:20;--w:480;--h:250"></div>
+    <div class="abs raised float" style="--x:4;--y:24;--w:472;--h:242;--face:var(--color-phone-body)">
+      <div class="abs" style="--x:7;--y:5"><div class="portrait raised" data-role="contact" data-big></div></div>
+      <div class="abs lcd sunken t-label" style="--x:79;--y:5;--w:52;--h:16;padding:var(--px) var(--sp-6)">03:12</div>
+      <div class="abs" style="--x:79;--y:24;--w:52;--h:12">
+        <span class="abs gb" style="--x:0;--y:6;--w:3;--h:3;--c:var(--color-text-inverse)"></span>
+        <span class="abs gb" style="--x:4;--y:4;--w:3;--h:5;--c:var(--pal-ink-3)"></span>
+        <span class="abs gb" style="--x:8;--y:2;--w:3;--h:7;--c:var(--pal-ink-3)"></span>
+        <span class="abs gb" style="--x:12;--y:0;--w:3;--h:9;--c:var(--pal-ink-3)"></span>
+        <span class="abs t-label" style="--x:18;--y:-2;color:var(--color-status-warning-on-light)">Noisy</span>
+      </div>
+      <div class="abs" id="viz" style="--x:79;--y:38;--w:52;--h:12"></div>
+      <div class="abs" style="--x:79;--y:54"><span class="led"></span> <span class="t-label">Mic</span></div>
+      <div class="abs t-heading" style="--x:7;--y:76;--w:124;--h:16">Mavis Thornbury</div>
+      <div class="abs t-ui" style="--x:7;--y:94;line-height:var(--line-height-body)">Retired, Lowmoor<br>Regular · day 2<br><span class="muted">4 facts on file</span></div>
+      <div class="abs" style="--x:7;--y:150" id="call-meters"></div>
+      <button class="abs btn lg danger" style="--x:7;--y:216;--w:124"><span>Hang up</span></button>
+      <div class="abs tape" style="--x:139;--y:5;--w:328;--h:190">
+        <div class="abs dark t-label" style="--x:7;--y:0;--w:312;--h:14;background:var(--color-bg-dark);padding:var(--px) var(--sp-4) 0"><i class="ico" style="--ic:var(--color-status-warning)"></i> Line degraded — scripted replies</div>
+        <div class="abs t-body" style="--x:10;--y:16;--w:308">
+          <div class="sysline">-- Call connected 10:39 --</div>
+          <div class="tl"><span class="who c">Mavis</span><span>Hello? If this is about the hedge again, I've already apologised.</span></div>
+          <div class="tl"><span class="who p">You</span><span>Good morning! Nothing to do with hedges. I'm calling about your account.</span></div>
+          <div class="tl"><span class="who c">Mavis</span><span>Which account? I have a library card.</span></div>
+          <div class="tl"><span class="who p">You</span><span>Exactly that one.</span></div>
+          <div class="tl"><span class="who c">Mavis</span><span>▒ ▒ ▒</span></div>
+        </div>
+      </div>
+      <button class="abs btn lg icon" style="--x:139;--y:200;--w:20" aria-label="Push to talk"><i class="ico" style="--ic:var(--color-text-inverse-muted)"></i></button>
+      <span class="abs input lg sunken" style="--x:164;--y:200;--w:256"><span class="ph">Type a reply…</span></span>
+      <button class="abs btn lg primary is-disabled" style="--x:424;--y:200;--w:44" disabled><span>Send</span></button>
+      <span class="abs t-ui muted" style="--x:139;--y:224">Waiting for Mavis… · Hold <span class="kbd raised">Ctrl</span> to talk</span>
+    </div>
+  </div>
+
+  <h2 id="s-report">Call report (medium modal) — §10.6</h2>
+  <div class="game" data-hud id="g-report">
+    <div class="abs gb" style="--y:20;--w:480;--h:250;--c:var(--pal-wall-2)"></div>
+    <div class="abs d50" style="--y:20;--w:480;--h:250"></div>
+    <div class="abs raised float" style="--x:80;--y:45;--w:320;--h:200;--face:var(--color-bg-surface-sunken)">
+      <div class="abs t-title" style="--x:8;--y:2">CALL REPORT</div>
+      <div class="abs t-label muted" style="--x:8;--y:22">Form 7B · Day 03 · 10:39</div>
+      <span class="abs stamp" style="--x:214;--y:6;--sc:var(--color-stamp-bad)">Hung up</span>
+      <div class="abs" style="--x:8;--y:40"><div class="portrait thumb" data-role="contact"></div></div>
+      <div class="abs t-ui" style="--x:48;--y:44;line-height:var(--line-height-body)">Mavis Thornbury<br><span class="muted">Duration 03:12</span></div>
+      <div class="abs" style="--x:8;--y:80;--w:302;height:auto">
+        <div class="t-label muted">Changes</div>
+        <div class="t-ui" style="line-height:var(--line-height-body)">
+          <i class="ico" style="--ic:var(--color-meter-trust)"></i> Trust &nbsp;&nbsp;&nbsp;&nbsp;<i class="ico" style="--ic:var(--color-meter-trust)"></i> warmed up a bit<br>
+          <i class="ico" style="--ic:var(--color-meter-suspicion)"></i> Suspicion <i class="ico" style="--ic:var(--color-meter-suspicion)"></i><i class="ico" style="--ic:var(--color-meter-suspicion)"></i> much more wary<br>
+          <i class="ico" style="--ic:var(--color-meter-patience)"></i> Patience &nbsp;<i class="ico" style="--ic:var(--color-meter-patience)"></i><i class="ico" style="--ic:var(--color-meter-patience)"></i><i class="ico" style="--ic:var(--color-meter-patience)"></i> ran out
+        </div>
+        <div class="t-label muted" style="margin-top:var(--sp-4)">Noted</div>
+        <div class="t-body">· Has a library card. Guards it fiercely.</div>
+        <div class="t-ui" style="margin-top:var(--sp-4); color: var(--color-status-danger-on-light)">Strike: none · Quota +0</div>
+      </div>
+      <button class="abs btn primary" style="--x:218;--y:178;--w:94"><span>File report</span></button>
+    </div>
+  </div>
+
+  <h2 id="s-review">Performance review (large modal) — §13.6</h2>
+  <div class="game" data-hud id="g-review">
+    <div class="abs gb" style="--y:20;--w:480;--h:250;--c:var(--pal-wall-1)"></div>
+    <div class="abs d50" style="--y:20;--w:480;--h:250"></div>
+    <div class="abs raised float" style="--x:40;--y:29;--w:400;--h:232;--face:var(--color-bg-surface-sunken)">
+      <div class="abs t-title" style="--x:8;--y:2">REVIEW — DAY 03</div>
+      <span class="abs stamp" style="--x:296;--y:6;--sc:var(--pal-amber-0)">Warned</span>
+      <div class="abs zebra t-ui" style="--x:8;--y:44;--w:190">
+        <div><span>Quota</span><span>5/6</span></div><div><span>Calls</span><span>12</span></div><div><span>Agreed</span><span>4</span></div>
+        <div><span>Coffee</span><span>4</span></div><div><span>Naps</span><span style="color:var(--color-status-danger-on-light)">1</span></div><div><span>Strikes</span><span>1/3</span></div>
+      </div>
+      <div class="abs" style="--x:206;--y:44;--w:186">
+        <div class="t-label muted">Supervisor's remarks</div>
+        <div class="t-body">Five out of six is what we in management call "nearly". Nearly doesn't pay for the carpet.</div>
+        <div style="margin-top:var(--sp-4)"><div class="portrait thumb" data-role="boss"></div></div>
+      </div>
+      <div class="abs t-ui" style="--x:8;--y:210"><i class="ico" style="--ic:var(--color-money-on-light)"></i> Bonus: none · Fine: <span style="color:var(--color-money-negative-on-light)">-20</span></div>
+      <button class="abs btn primary" style="--x:312;--y:208;--w:80"><span>Clock out</span></button>
+    </div>
+  </div>
+
+  <h2 id="s-gameover">Game over: termination notice — §13.11</h2>
+  <div class="game" id="g-over">
+    <div class="abs flat float" style="--x:90;--y:17;--w:300;--h:236;--face:var(--color-doc-pink-slip)">
+      <div class="abs t-title" style="--x:10;--y:6">TERMINATION NOTICE</div>
+      <div class="abs t-label" style="--x:10;--y:34;color:var(--color-text-muted)">Form 99 · Effective immediately</div>
+      <div class="abs t-ui" style="--x:10;--y:52;--w:280;line-height:var(--line-height-body)">
+        <span class="t-label muted">Employee</span> You<br>
+        <span class="t-label muted">Days of service</span> 7<br>
+        <span class="t-label muted">Reason</span> Asleep at desk during a client call.<br>
+        <span class="t-label muted">Calls made</span> 61<br>
+        <span class="t-label muted">Coffees consumed</span> 29<br>
+        <span class="t-label muted">Money made for the company</span> 8,420
+      </div>
+      <div class="abs gbo" style="--x:10;--y:150;--w:48;--h:40;--c:var(--pal-wood-3);--o:var(--pal-wood-0)"></div>
+      <span class="abs stamp" style="--x:192;--y:150;--sc:var(--color-stamp-bad)">Fired</span>
+      <button class="abs btn primary" style="--x:132;--y:212;--w:160"><span>Start again from day 1</span></button>
+      <button class="abs btn" style="--x:20;--y:212;--w:104"><span>Quit to title</span></button>
+    </div>
+    <div class="abs t-ui inv-muted" style="--x:90;--y:256">Best: day 7 · Runs: 4</div>
+  </div>
+
+  <h2 id="s-sleepy">Sleepiness level 2 + pause menu — §15.7, §13.13</h2>
+  <div class="row">
+    <div class="game" data-hud data-sleepy id="g-sleepy">
+      <div class="abs gb" style="--y:20;--w:480;--h:120;--c:var(--pal-wall-2)"></div>
+      <div class="abs gb d25" style="--y:140;--w:480;--h:130;--c:var(--pal-carpet-2);--dc:var(--pal-carpet-1)"></div>
+      <div class="abs gbo" style="--x:96;--y:136;--w:48;--h:64;--c:var(--pal-ink-3)"></div>
+      <div class="abs t-ui inv" style="--x:150;--y:100">Break room: sleepiness 78, mid-blink</div>
+      <div class="vig" style="top: var(--size-hud-height)">
+        <div class="ring r50" style="--in: 0"></div>
+        <div class="ring r25" style="--in: var(--sp-16)"></div>
+        <div class="abs gb" style="--y:0;--w:480;--h:40;--c:var(--color-bg-overlay)"></div>
+        <div class="abs gb" style="--y:210;--w:480;--h:40;--c:var(--color-bg-overlay)"></div>
+      </div>
+    </div>
+  </div>
+  <div class="game" data-hud data-paused id="g-pause">
+    <div class="abs gb" style="--y:20;--w:480;--h:250;--c:var(--pal-wall-2)"></div>
+    <div class="abs d50" style="--y:20;--w:480;--h:250"></div>
+    <div class="abs raised float" style="--x:120;--y:65;--w:240;--h:160">
+      <div class="abs t-title" style="--x:8;--y:0">ON BREAK</div>
+      <div class="abs" style="--x:20;--y:30;--w:200;display:flex;flex-direction:column;gap:var(--sp-4)">
+        <button class="btn lg primary is-focus"><span>Resume</span></button>
+        <button class="btn lg"><span>Settings</span></button>
+        <button class="btn lg"><span>Controls</span></button>
+        <button class="btn lg"><span>Save and quit to title</span></button>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top: var(--sp-16)">End of reference. Change this page whenever DESIGN.md §14 or the screen layouts change (DESIGN.md §22).</p>
+</div>
+
+<script>
+// ---------------- scale switcher ----------------
+for (const b of document.querySelectorAll('[data-scale]')) {
+  b.addEventListener('click', () => {
+    document.documentElement.dataset.scale = b.dataset.scale;
+    document.querySelectorAll('[data-scale]').forEach(x => x.classList.toggle('primary', x === b));
+    document.getElementById('pxv').textContent = b.dataset.scale;
+    runFontCheck();
+  });
+}
+
+// ---------------- palette (reads values from tokens.css) ----------------
+const ramps = {
+  'Ink': ['ink-0','ink-1','ink-2','ink-3','ink-4','ink-5','ink-6','ink-7'],
+  'Putty': ['putty-0','putty-1','putty-2','putty-3','putty-4','putty-5','paper'],
+  'Carpet': ['carpet-0','carpet-1','carpet-2','carpet-3'],
+  'Wall': ['wall-0','wall-1','wall-2','wall-3','wall-4'],
+  'Wood': ['wood-0','wood-1','wood-2','wood-3','wood-4'],
+  'Skin': ['skin-edge','skin-a0','skin-a1','skin-a2','skin-b0','skin-b1','skin-b2','skin-c0','skin-c1','skin-c2','skin-d0','skin-d1','skin-d2'],
+  'Accents': ['hi-0','hi-1','hi-2','amber-0','amber-1','amber-2','red-0','red-1','red-2','green-0','green-1','green-2','teal-0','teal-1','teal-2','violet-0','violet-1','violet-2','lime-1','lime-2','rose-1','rose-2'],
+};
+const cs = getComputedStyle(document.documentElement);
+let idx = 0, html = '';
+for (const [name, list] of Object.entries(ramps)) {
+  html += `<h3>${name}</h3><div class="ramp">`;
+  for (const t of list) {
+    html += `<div class="sw" style="--c: var(--pal-${t})"><i></i><b>${String(idx++).padStart(2,'0')} ${t}</b><small>${cs.getPropertyValue('--pal-' + t).trim()}</small></div>`;
+  }
+  html += '</div>';
+}
+document.getElementById('palette-out').innerHTML = html + `<p>${idx} colours.</p>`;
+
+// ---------------- button matrix ----------------
+const variants = ['primary','secondary','danger','go'];
+const states = [['','Default'],['is-hover','Hover'],['is-pressed','Pressed'],['is-focus','Focus'],['is-disabled','Disabled']];
+let bm = '<table><tr><td></td>' + states.map(s => `<td class="t-label muted">${s[1]}</td>`).join('') + '</tr>';
+for (const v of variants) {
+  bm += `<tr><td class="t-label muted">${v}</td>` + states.map(s => `<td style="padding: var(--sp-4)"><button class="btn ${v === 'secondary' ? '' : v} ${s[0]}" ${s[0]==='is-disabled'?'disabled':''}><span>${v === 'go' ? 'Answer' : v === 'danger' ? 'Hang up' : v === 'primary' ? 'Send' : 'Cancel'}</span></button></td>`).join('') + '</tr>';
+}
+document.getElementById('btn-matrix').innerHTML = bm + '</table>';
+
+// ---------------- meters ----------------
+const seg = (cls, n, opts = {}) => {
+  const count = opts.count ?? 10, size = opts.size ?? '';
+  let s = `<span class="meter ${size} ${cls}">`;
+  for (let i = 1; i <= count; i++) s += `<i class="${i <= n ? 'on' : (opts.hi && i <= opts.hi ? 'fz' : '')}"></i>`;
+  if (opts.tick) s += `<span class="tick" style="left: calc(var(--px) * ${opts.tick})"></span>`;
+  return s + '</span>';
+};
+const mrow = (label, m) => `<div class="row" style="align-items:center; margin-bottom: var(--sp-4)"><span class="t-label inv-muted" style="width: calc(var(--px) * 140)">${label}</span>${m}</div>`;
+document.getElementById('meters').innerHTML =
+  mrow('Energy 72 (small)', seg('m-energy', 8)) +
+  mrow('Energy 24 — low', seg('m-energy-low', 3)) +
+  mrow('Energy 8 — critical', seg('m-energy-crit', 1)) +
+  mrow('Sleepiness 62, tick at 70', seg('m-sleep', 7, { tick: 28 })) +
+  mrow('Caffeine', `<span class="pips caf" style="--pf: var(--color-meter-caffeine)"><i class="on"></i><i class="on"></i><i></i></span>`) +
+  mrow('Trust 40–60 (large, fuzzy)', seg('m-trust', 4, { size: 'lg', hi: 6 })) +
+  mrow('Suspicion 20 (large)', seg('m-susp', 2, { size: 'lg' })) +
+  mrow('Patience unknown (large)', seg('m-pat', 0, { size: 'lg', hi: 10 })) +
+  mrow('Morale 3/5 (stat)', seg('m-trust', 3, { size: 'stat', count: 5 }));
+
+// ---------------- portraits (greybox faces on portrait guides) ----------------
+const roles = { contact: 'var(--color-portrait-contact)', coworker: 'var(--color-portrait-coworker)', boss: 'var(--color-portrait-boss)', candidate: 'var(--color-portrait-candidate)', unknown: 'var(--color-portrait-unknown)' };
+const skins = { contact: 'a', coworker: 'c', boss: 'b', candidate: 'd', unknown: null };
+function face(role, thumb) {
+  const o = thumb ? -16 : 0, oy = thumb ? -10 : 0;
+  const p = (x, y, w, h, c) => `<i class="abs gb" style="--x:${x + o};--y:${y + oy};--w:${w};--h:${h};--c:${c}"></i>`;
+  if (role === 'unknown') return p(18, 8, 28, 40, 'var(--pal-ink-3)') + p(8, 50, 48, 14, 'var(--pal-ink-3)');
+  const s = skins[role];
+  return p(8, 50, 48, 14, role === 'boss' ? 'var(--pal-red-1)' : 'var(--pal-putty-3)') +
+    p(18, 8, 28, 39, `var(--pal-skin-${s}1)`) + p(17, 4, 30, 10, 'var(--pal-wood-1)') +
+    p(22, 21, 6, 1, 'var(--pal-wood-0)') + p(36, 21, 6, 1, 'var(--pal-wood-0)') +
+    p(23, 25, 4, 4, 'var(--pal-ink-0)') + p(37, 25, 4, 4, 'var(--pal-ink-0)') +
+    p(23, 25, 1, 1, 'var(--pal-paper)') + p(37, 25, 1, 1, 'var(--pal-paper)') +
+    p(29, 39, 6, 1, `var(--pal-skin-${s}0)`);
+}
+const pf = (role, thumb) => `<div class="portrait ${thumb ? 'thumb' : 'raised'}"><div class="bg face" style="--rb:${roles[role]}">${face(role, thumb)}</div></div>`;
+document.getElementById('portraits').innerHTML = Object.keys(roles).map(r =>
+  `<div>${pf(r)}<div class="plate flat t-ui" style="width: calc(var(--px) * 68)">${r}</div></div>`).join('') +
+  `<div>${pf('contact', true)}<span class="cap">thumb crop</span></div>`;
+for (const el of document.querySelectorAll('.game .portrait[data-role]')) {
+  const thumb = el.classList.contains('thumb');
+  el.innerHTML = `<div class="bg face" style="--rb:${roles[el.dataset.role]}">${face(el.dataset.role, thumb)}</div>`;
+}
+
+// ---------------- HUD (§12.1) ----------------
+const hud = (paused) => `
+<div class="abs" style="--y:0;--w:480;--h:20;background:var(--color-bg-dark);box-shadow: inset 0 calc(var(--px)*-1) 0 0 var(--color-line), inset 0 var(--px) 0 0 var(--color-bg-dark-raised);z-index:var(--z-hud)">
+  <i class="abs ico" style="--x:4;--y:5;--ic:var(--pal-hi-2)"></i>
+  <span class="abs t-label inv-muted" style="--x:16;--y:4">DAY 03</span>
+  <span class="abs t-label" style="--x:62;--y:4;color:${paused ? 'var(--color-status-warning)' : 'var(--color-text-inverse)'}">${paused ? 'PAUSED' : '10:42'}</span>
+  <i class="abs gb" style="--x:102;--y:4;--w:1;--h:12;--c:var(--color-line-soft-inverse)"></i>
+  <i class="abs ico" style="--x:108;--y:5;--ic:var(--color-meter-energy)"></i>
+  <span class="abs" style="--x:119;--y:5">${seg('m-energy', 7)}</span>
+  <i class="abs ico" style="--x:166;--y:5;--ic:var(--color-meter-sleepiness)"></i>
+  <span class="abs" style="--x:177;--y:5">${seg('m-sleep', 4, { tick: 28 })}</span>
+  <i class="abs ico" style="--x:224;--y:5;--ic:var(--color-meter-caffeine)"></i>
+  <span class="abs pips caf" style="--x:235;--y:7;--pf: var(--color-meter-caffeine)"><i class="on"></i><i></i><i></i></span>
+  <i class="abs gb" style="--x:252;--y:4;--w:1;--h:12;--c:var(--color-line-soft-inverse)"></i>
+  <i class="abs ico" style="--x:258;--y:5;--ic:var(--color-text-inverse)"></i>
+  <span class="abs t-label inv" style="--x:270;--y:4">3/8</span>
+  <span class="abs bar" style="--x:307;--y:7;--w:40;--v:14"><b></b></span>
+  <i class="abs gb" style="--x:352;--y:4;--w:1;--h:12;--c:var(--color-line-soft-inverse)"></i>
+  <i class="abs ico" style="--x:358;--y:5;--ic:var(--color-money)"></i>
+  <span class="abs t-label" style="--x:369;--y:4;--w:63;text-align:right;color:var(--color-money)">1,240</span>
+  <button class="abs btn icon" style="--x:438;--y:2;--h:16" aria-label="Memos"><i class="ico"></i></button>
+  <span class="abs badge" style="--x:449;--y:0">2</span>
+  <button class="abs btn icon" style="--x:458;--y:2;--h:16" aria-label="Menu"><i class="ico"></i></button>
+</div>`;
+for (const g of document.querySelectorAll('.game[data-hud]')) g.insertAdjacentHTML('beforeend', hud('paused' in g.dataset));
+
+// ---------------- computer windows ----------------
+const apps = [['dashboard','Today'],['contacts','Card File'],['mail','Memos'],['finances','Ledger'],['research','Initiatives'],['shop','Procurement'],['staff','Personnel']];
+function folderTabs(active, locked) {
+  let x = 6, s = '';
+  apps.forEach(([id, title], i) => {
+    const on = id === active, lock = locked.includes(id);
+    const w = on ? 6 + 16 + 4 + title.length * 7 + 6 : 26;
+    s += `<div class="abs raised" style="--x:${x};--y:${on ? 246 : 248};--w:${w};--h:${on ? 18 : 16};--face:${on ? 'var(--color-os-tab-active)' : 'var(--color-os-tab)'};${on ? 'border-top:0;box-shadow:none' : ''}">
+      <i class="abs ico md" style="--x:4;--y:${on ? 0 : -1};--ic:${lock ? 'var(--color-text-disabled)' : 'var(--pal-putty-2)'}"></i>${on ? `<span class="abs t-ui" style="--x:24;--y:2">${title}</span>` : ''}</div>`;
+    x += w + 2;
+  });
+  return s + `<button class="abs btn" style="--x:406;--y:248;--w:66"><span>Log off</span></button>`;
+}
+function windowChrome(title, inner, status) {
+  return `<div class="abs raised" style="--x:6;--y:24;--w:468;--h:222;--face:var(--color-bg-surface)">
+    <div class="abs hatch" style="--x:1;--y:1;--w:464;--h:14"></div>
+    <div class="abs" style="--x:1;--y:1;--w:${22 + title.length * 7 + 4};--h:14;background:var(--color-os-titlebar)"></div>
+    <i class="abs ico" style="--x:3;--y:3;--ic:var(--pal-putty-4)"></i>
+    <span class="abs t-label" style="--x:15;--y:2;color:var(--color-os-titlebar-text)">${title}</span>
+    <button class="abs raised" style="--x:452;--y:2;--w:11;--h:11;--face:var(--pal-putty-4);padding:0" aria-label="Close ${title}"></button>
+    ${inner}
+    <div class="abs t-ui muted" style="--x:1;--y:207;--w:464;--h:12;background:var(--color-bg-surface-raised);box-shadow: inset 0 var(--px) 0 0 var(--color-line-soft);padding: var(--px) var(--sp-4) 0;display:flex;justify-content:space-between"><span>${status}</span><span>Updated 10:42</span></div>
+  </div>`;
+}
+document.getElementById('win-today').outerHTML = windowChrome('Today', `
+  <div class="abs" style="--x:1;--y:15;--w:464;--h:16;background:var(--color-bg-surface-raised)"></div>
+  <div class="abs" style="--x:1;--y:31;--w:464;--h:176;background:var(--color-bg-surface)">
+    <div class="abs flat float" style="--x:12;--y:6;--w:440;--h:162;--face:var(--color-bg-surface-sunken)">
+      <div class="abs card flat" style="--x:6;--y:6;--w:180;--h:84"><div class="hd">Today's quota</div><div class="rule"></div><div class="bd"><span class="t-label muted">Deals closed</span><br><span class="t-title">3/8</span><br><span class="bar" style="width: calc(var(--px) * 166); --v: 62"><b></b></span><br><span class="t-ui muted">6h 18m left</span></div></div>
+      <div class="abs t-ui" style="--x:6;--y:96;--w:180;line-height:var(--line-height-body)">
+        <div class="t-label muted">Objectives</div>
+        <div><i class="check sunken on"></i> <span class="muted">Drink coffee</span></div>
+        <div><i class="check sunken"></i> Make 3 calls <span style="float:right">1/3</span></div>
+        <div><i class="check sunken"></i> No naps</div>
+      </div>
+      <div class="abs flat" style="--x:196;--y:6;--w:236;--h:84;--face:var(--color-bg-surface-sunken);box-shadow: inset 0 calc(var(--px)*4) 0 0 var(--color-doc-letterhead-boss)">
+        <div class="abs t-label muted" style="--x:6;--y:6">From the desk of Management</div>
+        <div class="abs t-body" style="--x:6;--y:20;--w:224">The coffee machine is a privilege, not a right. Quota stands at 8.</div>
+        <button class="abs btn ghost" style="--x:4;--y:64"><span>Open memo</span></button>
+      </div>
+      <div class="abs t-label muted" style="--x:196;--y:100">Day timeline</div>
+      <div class="abs sunken" style="--x:196;--y:114;--w:236;--h:12">
+        <i class="abs gb" style="--x:60;--y:0;--w:1;--h:10;--c:var(--color-interact)"></i>
+        <i class="abs gb" style="--x:18;--y:2;--w:3;--h:5;--c:var(--pal-green-1)"></i><i class="abs gb" style="--x:40;--y:2;--w:3;--h:5;--c:var(--pal-red-1)"></i>
+      </div>
+      <div class="abs t-ui muted" style="--x:196;--y:130;--w:236;display:flex;justify-content:space-between"><span>09:00</span><span>17:00</span></div>
+    </div>
+  </div>`, '1 memo unread') + folderTabs('dashboard', ['research','shop','staff']);
+
+document.getElementById('win-card').outerHTML = windowChrome('Card File', `
+  <div class="abs" style="--x:1;--y:15;--w:464;--h:16;background:var(--color-bg-surface-raised)">
+    <div class="abs tabs t-ui" style="--x:4;--y:1"><span class="tab on">All</span><span class="tab">Regulars</span><span class="tab">New</span><span class="tab">Burned</span></div>
+    <span class="abs input sunken t-ui" style="--x:340;--y:1;--w:120;--h:14"><span class="ph">Search…</span></span>
+  </div>
+  <div class="abs sunken list t-ui" style="--x:1;--y:31;--w:168;--h:176">
+    <div class="r sel">Mavis Thornbury<br><span class="muted">Regular · day 3</span><span class="led" style="--lc: var(--color-status-success)"></span></div>
+    <div class="r">Gordon Pell<br><span class="muted">New · never</span><span class="led" style="--lc: var(--color-status-success)"></span></div>
+    <div class="r">Unity Brakes<br><span class="muted">Call back · day 2</span><span class="led" style="--lc: var(--color-status-warning)"></span></div>
+    <div class="r" style="color:var(--color-text-disabled)">Desmond Ofori<br><span>Burned · day 1</span><span class="led"></span></div>
+  </div>
+  <div class="abs" style="--x:172;--y:31;--w:294;--h:176;background:var(--color-bg-surface)">
+    <div class="abs card flat" style="--x:6;--y:6;--w:282;--h:164">
+      <div class="abs" style="--x:6;--y:6"><div class="portrait raised" data-role="contact"></div></div>
+      <div class="abs t-heading" style="--x:80;--y:6">Mavis Thornbury</div>
+      <div class="abs t-ui muted" style="--x:80;--y:24;line-height:var(--line-height-body)">Retired librarian<br>Lowmoor</div>
+      <div class="abs" style="--x:80;--y:56;--w:196;height:var(--px);background:var(--color-index-rule)"></div>
+      <div class="abs t-ui" style="--x:80;--y:62;line-height:var(--line-height-body)">
+        <span class="t-label muted">Trust</span><br>${seg('m-trust', 4, { size: 'lg', hi: 6 })}<br>
+        <span class="t-label muted">Suspicion</span><br>${seg('m-susp', 2, { size: 'lg' })}
+      </div>
+      <div class="abs t-body" style="--x:6;--y:80;--w:70"><span class="t-label muted">Known</span><br>Cat: ???</div>
+      <button class="abs btn primary" style="--x:226;--y:144;--w:50"><span>Call</span></button>
+    </div>
+  </div>`, '4 cards · 1 burned') + folderTabs('contacts', ['research','shop','staff']);
+for (const el of document.querySelectorAll('.game .portrait[data-role]')) {
+  if (!el.innerHTML) el.innerHTML = `<div class="bg face" style="--rb:${roles[el.dataset.role]}">${face(el.dataset.role, el.classList.contains('thumb'))}</div>`;
+}
+
+// call meters + visualiser
+document.getElementById('call-meters').innerHTML = [['Trust','m-trust',4,6],['Suspicion','m-susp',6,0],['Patience','m-pat',2,0]].map(([l,c,n,h]) =>
+  `<div style="height: calc(var(--px) * 21)"><span class="t-label">${l}</span><br>${seg(c, n, { size: 'lg', hi: h })}</div>`).join('');
+document.getElementById('viz').innerHTML = [4,8,12,6,3,9,5,2].map((h,i) =>
+  `<i class="abs gb" style="--x:${i*5};--y:${12-h};--w:3;--h:${h};--c:var(--pal-ink-3)"></i>`).join('');
+
+// ---------------- font check ----------------
+function runFontCheck() {
+  document.fonts.ready.then(() => {
+    const c = document.createElement('canvas').getContext('2d');
+    const rows = [];
+    for (const [fam, size] of [['Departure Mono', 11], ['Jersey 15', 27]]) {
+      const loaded = document.fonts.check(`${size}px "${fam}"`);
+      c.font = `${size}px "${fam}"`;
+      const m = c.measureText('M'), w = c.measureText('0123456789').width / 10, wi = c.measureText('i').width;
+      const capH = (c.measureText('H').actualBoundingBoxAscent || 0);
+      rows.push(`<tr><td>${fam} @ ${size}px</td><td>${loaded ? 'loaded' : '<b style="color:var(--color-status-danger)">NOT LOADED</b>'}</td><td>advance M=${m.width.toFixed(2)} digit=${w.toFixed(2)} i=${wi.toFixed(2)}</td><td>cap height≈${capH.toFixed(2)}</td></tr>`);
+    }
+    document.getElementById('fontcheck').innerHTML = rows.join('');
+  });
+}
+runFontCheck();
+</script>
+</body>
+</html>
